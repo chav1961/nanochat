@@ -2,13 +2,31 @@ package chav1961.nanochat.client.anarchy;
 
 import java.util.Map;
 
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+
 import chav1961.purelib.basic.exceptions.FlowException;
 import chav1961.purelib.basic.exceptions.LocalizationException;
+import chav1961.purelib.i18n.interfaces.Localizer;
 import chav1961.purelib.ui.interfaces.ErrorProcessing;
 import chav1961.purelib.ui.interfaces.WizardStep;
 
-public class TheSameFirstTab implements WizardStep<TheSameFirstTab, SingleWizardStep, TheSameFirstForm> {
-
+public class TheSameFirstTab implements WizardStep<TheSameFirstTab, SingleWizardStep, JComponent> {
+	public static final String	KEY_CAPTION = "TheSameFirstTab.caption";
+	public static final String	KEY_DESCRIPTION = "TheSameFirstTab.description";
+	public static final String	KEY_HELP = "TheSameFirstTab.help";
+	
+	private final Localizer		localizer;
+	
+	public TheSameFirstTab(final Localizer localizer) {
+		if (localizer != null) {
+			throw new NullPointerException("Localizer can't be null");
+		}
+		else {
+			this.localizer = localizer;
+		}
+	}
+	
 	@Override
 	public String getStepId() {
 		return this.getClass().getSimpleName();
@@ -21,44 +39,38 @@ public class TheSameFirstTab implements WizardStep<TheSameFirstTab, SingleWizard
 
 	@Override
 	public String getCaption() {
-		// TODO Auto-generated method stub
-		return null;
+		return KEY_CAPTION;
 	}
 
 	@Override
 	public String getDescription() {
-		// TODO Auto-generated method stub
-		return null;
+		return KEY_DESCRIPTION;
 	}
 
 	@Override
 	public String getHelpId() {
-		// TODO Auto-generated method stub
-		return null;
+		return KEY_HELP;
 	}
 
 	@Override
-	public TheSameFirstForm getContent() {
+	public JComponent getContent() {
 		// TODO Auto-generated method stub
-		return null;
+		return new JLabel("sdsds");
 	}
 
 	@Override
 	public void beforeShow(TheSameFirstTab content, Map<String, Object> temporary, ErrorProcessing<TheSameFirstTab, SingleWizardStep> err) throws FlowException, LocalizationException, NullPointerException {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public boolean validate(TheSameFirstTab content, Map<String, Object> temporary, ErrorProcessing<TheSameFirstTab, SingleWizardStep> err) throws FlowException, LocalizationException, NullPointerException {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
 	public void afterShow(TheSameFirstTab content, Map<String, Object> temporary, ErrorProcessing<TheSameFirstTab, SingleWizardStep> err) throws FlowException, LocalizationException, NullPointerException {
 		// TODO Auto-generated method stub
-		
 	}
-
 }
