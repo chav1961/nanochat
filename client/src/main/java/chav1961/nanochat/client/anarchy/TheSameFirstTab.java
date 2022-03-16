@@ -12,14 +12,14 @@ import chav1961.purelib.ui.interfaces.ErrorProcessing;
 import chav1961.purelib.ui.interfaces.WizardStep;
 
 public class TheSameFirstTab implements WizardStep<TheSameFirstTab, SingleWizardStep, JComponent> {
-	public static final String	KEY_CAPTION = "TheSameFirstTab.caption";
-	public static final String	KEY_DESCRIPTION = "TheSameFirstTab.description";
-	public static final String	KEY_HELP = "TheSameFirstTab.help";
+	public static final String	KEY_CAPTION = TheSameFirstTab.class.getSimpleName()+".caption";
+	public static final String	KEY_DESCRIPTION = TheSameFirstTab.class.getSimpleName()+".description";
+	public static final String	KEY_HELP = TheSameFirstTab.class.getSimpleName()+".help";
 	
 	private final Localizer		localizer;
 	
 	public TheSameFirstTab(final Localizer localizer) {
-		if (localizer != null) {
+		if (localizer == null) {
 			throw new NullPointerException("Localizer can't be null");
 		}
 		else {
