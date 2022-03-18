@@ -8,6 +8,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JComponent;
@@ -29,6 +32,8 @@ import chav1961.purelib.basic.interfaces.LoggerFacade.Severity;
 import chav1961.purelib.i18n.interfaces.Localizer;
 import chav1961.purelib.model.ContentModelFactory;
 import chav1961.purelib.model.interfaces.ContentMetadataInterface;
+import chav1961.purelib.net.LightWeightDiscovery;
+import chav1961.purelib.net.LightWeightDiscovery.PortBroadcastGenerator;
 import chav1961.purelib.ui.interfaces.ErrorProcessing;
 import chav1961.purelib.ui.interfaces.ItemAndSelection;
 import chav1961.purelib.ui.swing.SwingUtils;
@@ -146,19 +151,33 @@ public class Application {
 	}
 
 	private static void ordinalRun(final ContentMetadataInterface mdi, final Localizer localizer, final SubstitutableProperties props) throws IOException {
-		final Application				app = new Application(mdi, localizer, props);
-		final JPopupMenu				popup = SwingUtils.toJComponent(mdi.byUIPath(URI.create("ui:/model/navigation.top.traymenu")),JPopupMenu.class); 
+		final Application	app = new Application(mdi, localizer, props);
+		final JPopupMenu	popup = SwingUtils.toJComponent(mdi.byUIPath(URI.create("ui:/model/navigation.top.traymenu")),JPopupMenu.class);
+		final Set<String>	names = new HashSet<>();
+		final int			discoveryPort = props.getProperty(Constants.PROP_GENERAL_DISCOVERY_PORT, int.class, "13666");
+		final int			tcpPort = props.getProperty(Constants.PROP_GENERAL_DISCOVERY_PORT, int.class, "13667");
+		final int			maintenanceTime = props.getProperty(Constants.PROP_GENERAL_DISCOVERY_MAINTENANCE_TIME, int.class, "30");
 
 		SwingUtils.assignActionListeners(popup,app);
-				
-		try(final JSystemTray			tray = new JSystemTray(localizer, KEY_APPLICATION_NAME, URI.create("root://"+Application.class.getName()+"/images/trayicon.png"), KEY_APPLICATION_TOOLTIP, popup, props.getProperty(Constants.PROP_GENERAL_TRAY_LANG_EN, boolean.class))) {
-//			final LightWeightDiscovery	discovery = new LightWeightDiscovery(null, null, 0, 0, null, 0)) {
+		names.add(props.getProperty(Constants.PROP_ANARCH_DISTRICT));
+		
+		try(final JSystemTray			tray = new JSystemTray(localizer, KEY_APPLICATION_NAME, URI.create("root://"+Application.class.getName()+"/images/trayicon.png"), KEY_APPLICATION_TOOLTIP, popup, props.getProperty(Constants.PROP_GENERAL_TRAY_LANG_EN, boolean.class));
+			final LightWeightDiscovery	discovery = new LightWeightDiscovery(props.getProperty(Constants.PROP_GENERAL_ID, UUID.class), names, discoveryPort, tcpPort, (p,t)->false, maintenanceTime)) {
 			
 			tray.addActionListener((e)->app.settings());
 			tray.message(Severity.info, localizer.getValue(KEY_APPLICATION_STARTED));
 			app.await();
 		} catch (EnvironmentException e) {
 			throw new IOException(e.getLocalizedMessage(), e);
+		}
+	}
+
+
+	private static class BroadcastGeneratorImpl implements PortBroadcastGenerator {
+		@Override
+		public boolean enumeratePorts(final int portNumber, final int timeout) {
+			// TODO Auto-generated method stub
+			return false;
 		}
 	}
 }

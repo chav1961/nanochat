@@ -11,6 +11,9 @@ public class Constants {
 	public static final String	PROP_GENERAL_NAME = "name";
 	public static final String	PROP_GENERAL_DEFAULT_LANG = "defaultLang";
 	public static final String	PROP_GENERAL_TRAY_LANG_EN = "trayLangEn";
+	public static final String	PROP_GENERAL_DISCOVERY_PORT = "discoveryPort";
+	public static final String	PROP_GENERAL_DISCOVERY_MAINTENANCE_TIME = "discoveryMaintenanceTime";
+	public static final String	PROP_GENERAL_TCP_PORT = "tcpPort";
 
 	public static final String	PROP_ANARCH = "anarch";
 	public static final String	PROP_ANARCH_SUBNETS = "subnets";
