@@ -21,11 +21,14 @@ import chav1961.nanochat.common.Constants;
 import chav1961.purelib.basic.PureLibSettings;
 import chav1961.purelib.basic.SubstitutableProperties;
 import chav1961.purelib.basic.exceptions.ContentException;
+import chav1961.purelib.basic.exceptions.EnvironmentException;
 import chav1961.purelib.basic.exceptions.LocalizationException;
 import chav1961.purelib.i18n.interfaces.Localizer;
+import chav1961.purelib.net.LightWeightDiscovery;
 import chav1961.purelib.ui.interfaces.ErrorProcessing;
 import chav1961.purelib.ui.interfaces.ItemAndSelection;
 import chav1961.purelib.ui.swing.useful.JDialogContainer;
+import chav1961.purelib.ui.swing.useful.JSystemTray;
 
 public class Application {
 
@@ -44,7 +47,7 @@ public class Application {
 				
 				try(final InputStream	is = new FileInputStream(configFile)) {
 					props.load(is);
-					ordinalRun(props);
+					ordinalRun(localizer, props);
 				} catch (IOException e) {
 					firstRun(localizer, configFile);
 				}
@@ -80,18 +83,24 @@ public class Application {
 			try(final OutputStream	fos = new FileOutputStream(configFile)) {
 				
 				props.store(fos, "");
+				ordinalRun(localizer, props);
 			} catch (IOException e) {
 				throw new ContentException(e.getLocalizedMessage(), e); 
 			}
-			ordinalRun(props);
 		}
 		else {
 			System.err.println("Cancel");
 		}
 	}
 
-	public static void ordinalRun(final SubstitutableProperties props) {
-		// TODO Auto-generated method stub
-		System.err.println("Ordinal");
+	public static void ordinalRun(final Localizer localizer, final SubstitutableProperties props) throws IOException {
+		try(final JSystemTray			tray = new JSystemTray(localizer, "Nano", null);
+			final LightWeightDiscovery	discovery = new LightWeightDiscovery(null, null, 0, 0, null, 0)) {
+			
+			
+			System.err.println("Ordinal");
+		} catch (EnvironmentException e) {
+			throw new IOException(e.getLocalizedMessage(), e);
+		}
 	}
 }

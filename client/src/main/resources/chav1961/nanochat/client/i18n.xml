@@ -20,7 +20,7 @@
 		<key name="TheSameFirstForm.addr.tt">В каких подсетях будут автоматически искаться односельчане</key>
 		<key name="TheSameFirstForm.useEn">Английское меню в трее</key>
 		<key name="TheSameFirstForm.useEn.tt">Если ваша ОС по умолчанию не настроена на русский язык, включить этот флажок, иначе в меню трея будут крякозябры вместо букв</key>
-		
+		 
 	</lang>
 	<lang name="ru">
 <!-- Локализация класса TheSameFirstTab -->	
