@@ -5,11 +5,43 @@
 		<key name="TheSameFirstTab.caption">First start</key>
 		<key name="TheSameFirstTab.description">Вы запускаете Nano Chat на вашем компьютере первый раз</key>
 		<key name="TheSameFirstTab.help">Укажите подсетку и назовите группу</key>
+
+<!-- Localization of TheSameFirstForm class  -->
+		<key name="TheSameFirstForm.caption">Самый первый запуск</key>
+		<key name="TheSameFirstForm.caption.tt">Самый первый запуск</key>
+		<key name="TheSameFirstForm.help">Самый первый запуск</key>
+		<key name="TheSameFirstForm.name">Прозвище</key>
+		<key name="TheSameFirstForm.name.tt">Под этим именем вас будут видеть в сети</key>
+		<key name="TheSameFirstForm.district">Деревня</key>
+		<key name="TheSameFirstForm.district.tt">В этой деревне вас будут видеть односельчане</key>
+		<key name="TheSameFirstForm.lang">Язык при запуске</key>
+		<key name="TheSameFirstForm.lang.tt">На каком языке будет работать интерфейс при запуске</key>
+		<key name="TheSameFirstForm.addr">Смотреть подсети</key>
+		<key name="TheSameFirstForm.addr.tt">В каких подсетях будут автоматически искаться односельчане</key>
+		<key name="TheSameFirstForm.useEn">Английское меню в трее</key>
+		<key name="TheSameFirstForm.useEn.tt">Если ваша ОС по умолчанию не настроена на русский язык, включить этот флажок, иначе в меню трея будут крякозябры вместо букв</key>
+		
 	</lang>
 	<lang name="ru">
 <!-- Локализация класса TheSameFirstTab -->	
 		<key name="TheSameFirstTab.caption">Первый запуск</key>
 		<key name="TheSameFirstTab.description">Вы запускаете Nano Chat на вашем компьютере первый раз</key>
 		<key name="TheSameFirstTab.help">Укажите подсетку и назовите группу</key>
+
+<!-- Локализация класса TheSameFirstForm -->	
+		<key name="TheSameFirstForm.caption">Самый первый запуск</key>
+		<key name="TheSameFirstForm.caption.tt">Самый первый запуск</key>
+		<key name="TheSameFirstForm.help">Самый первый запуск</key>
+		<key name="TheSameFirstForm.name">Прозвище</key>
+		<key name="TheSameFirstForm.name.tt">Под этим именем вас будут видеть в сети</key>
+		<key name="TheSameFirstForm.district">Деревня</key>
+		<key name="TheSameFirstForm.district.tt">В этой деревне вас будут видеть односельчане</key>
+		<key name="TheSameFirstForm.lang">Язык при запуске</key>
+		<key name="TheSameFirstForm.lang.tt">На каком языке будет работать интерфейс при запуске</key>
+		<key name="TheSameFirstForm.addr">Смотреть подсети</key>
+		<key name="TheSameFirstForm.addr.tt">В каких подсетях будут автоматически искаться односельчане</key>
+		<key name="TheSameFirstForm.useEn">Английское меню в трее</key>
+		<key name="TheSameFirstForm.useEn.tt">Если ваша ОС по умолчанию не настроена на русский язык, включить этот флажок, иначе в меню трея будут крякозябры вместо букв</key>
+		
 	</lang>	
 </localization>
