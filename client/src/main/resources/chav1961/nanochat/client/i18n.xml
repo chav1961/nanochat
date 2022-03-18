@@ -1,45 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <localization xmlns="http://www.i18n.purelib.chav1961.ru/">
 	<lang name="en">
+<!-- Localization of application -->	
+		<key name="application.name">NanoChat client</key>
+		<key name="application.name.tt">Nanochat client</key>
+		<key name="application.started">Nanochat client started</key>
+		<key name="application.confirm.exit">Are you sure to really exit from application?</key>
+		<key name="application.confirm.exit.title">Confirm exit</key>
+
+<!-- Localization of tray menu  -->	
+		<key name="traymenu.settings">Settings</key>
+		<key name="traymenu.settings.tt">Settings</key>
+		<key name="traymenu.exit">Exit</key>
+		<key name="traymenu.exit.tt">Exit</key>
+	
 <!-- Localization of TheSameFirstTab class  -->	
 		<key name="TheSameFirstTab.caption">First start</key>
 		<key name="TheSameFirstTab.description">Вы запускаете Nano Chat на вашем компьютере первый раз</key>
-		<key name="TheSameFirstTab.help">Укажите подсетку и назовите группу</key>
+		<key name="TheSameFirstTab.help">Укажите подсетку и назовите тусовку</key>
 
 <!-- Localization of TheSameFirstForm class  -->
 		<key name="TheSameFirstForm.caption">Самый первый запуск</key>
 		<key name="TheSameFirstForm.caption.tt">Самый первый запуск</key>
 		<key name="TheSameFirstForm.help">Самый первый запуск</key>
-		<key name="TheSameFirstForm.name">Прозвище</key>
-		<key name="TheSameFirstForm.name.tt">Под этим именем вас будут видеть в сети</key>
-		<key name="TheSameFirstForm.district">Деревня</key>
-		<key name="TheSameFirstForm.district.tt">В этой деревне вас будут видеть односельчане</key>
+		<key name="TheSameFirstForm.name">Погоняло</key>
+		<key name="TheSameFirstForm.name.tt">Под этим именем вас будут видеть в тусовке</key>
+		<key name="TheSameFirstForm.district">Тусовка</key>
+		<key name="TheSameFirstForm.district.tt">В этой тусовке вас будут видеть</key>
 		<key name="TheSameFirstForm.lang">Язык при запуске</key>
 		<key name="TheSameFirstForm.lang.tt">На каком языке будет работать интерфейс при запуске</key>
 		<key name="TheSameFirstForm.addr">Смотреть подсети</key>
-		<key name="TheSameFirstForm.addr.tt">В каких подсетях будут автоматически искаться односельчане</key>
+		<key name="TheSameFirstForm.addr.tt">В каких подсетях будут автоматически искаться тусовка</key>
 		<key name="TheSameFirstForm.useEn">Английское меню в трее</key>
 		<key name="TheSameFirstForm.useEn.tt">Если ваша ОС по умолчанию не настроена на русский язык, включить этот флажок, иначе в меню трея будут крякозябры вместо букв</key>
 		 
 	</lang>
 	<lang name="ru">
+<!-- Локализация приложения -->	
+		<key name="application.name">Клиент NanoChat</key>
+		<key name="application.name.tt">Клиент nanochat</key>
+		<key name="application.started">Клиент Nanochat запущен</key>
+		<key name="application.confirm.exit">Вы действительно хотите завершить работу приложения?</key>
+		<key name="application.confirm.exit.title">Подтвердите выход</key>
+	
+<!-- Локализация меню трея-->	
+		<key name="traymenu.settings">Настройки</key>
+		<key name="traymenu.settings.tt">Настройки</key>
+		<key name="traymenu.exit">Выход</key>
+		<key name="traymenu.exit.tt">Завершить работу</key>
+
 <!-- Локализация класса TheSameFirstTab -->	
 		<key name="TheSameFirstTab.caption">Первый запуск</key>
 		<key name="TheSameFirstTab.description">Вы запускаете Nano Chat на вашем компьютере первый раз</key>
-		<key name="TheSameFirstTab.help">Укажите подсетку и назовите группу</key>
+		<key name="TheSameFirstTab.help">Укажите подсетку и назовите тусовку</key>
 
 <!-- Локализация класса TheSameFirstForm -->	
 		<key name="TheSameFirstForm.caption">Самый первый запуск</key>
 		<key name="TheSameFirstForm.caption.tt">Самый первый запуск</key>
 		<key name="TheSameFirstForm.help">Самый первый запуск</key>
-		<key name="TheSameFirstForm.name">Прозвище</key>
-		<key name="TheSameFirstForm.name.tt">Под этим именем вас будут видеть в сети</key>
-		<key name="TheSameFirstForm.district">Деревня</key>
-		<key name="TheSameFirstForm.district.tt">В этой деревне вас будут видеть односельчане</key>
+		<key name="TheSameFirstForm.name">Погоняло</key>
+		<key name="TheSameFirstForm.name.tt">Под этим именем вас будут видеть в тусовке</key>
+		<key name="TheSameFirstForm.district">Тусовка</key>
+		<key name="TheSameFirstForm.district.tt">В этой тусовке вас будут видеть</key>
 		<key name="TheSameFirstForm.lang">Язык при запуске</key>
 		<key name="TheSameFirstForm.lang.tt">На каком языке будет работать интерфейс при запуске</key>
 		<key name="TheSameFirstForm.addr">Смотреть подсети</key>
-		<key name="TheSameFirstForm.addr.tt">В каких подсетях будут автоматически искаться односельчане</key>
+		<key name="TheSameFirstForm.addr.tt">В каких подсетях будут автоматически искаться тусовка</key>
 		<key name="TheSameFirstForm.useEn">Английское меню в трее</key>
 		<key name="TheSameFirstForm.useEn.tt">Если ваша ОС по умолчанию не настроена на русский язык, включить этот флажок, иначе в меню трея будут крякозябры вместо букв</key>
 		

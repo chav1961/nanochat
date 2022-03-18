@@ -32,7 +32,7 @@ public class TheSameFirstForm implements FormManager<Object,TheSameFirstForm>, M
 	
 	@LocaleResource(value="TheSameFirstForm.district",tooltip="TheSameFirstForm.district.tt")
 	@Format("30m")
-	public String				district = "shaize";
+	public String				district = "Одуванчики";
 
 	@LocaleResource(value="TheSameFirstForm.lang",tooltip="TheSameFirstForm.lang.tt")
 	@Format("30m")
