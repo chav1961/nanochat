@@ -1,5 +1,6 @@
 package chav1961.nanochat.client.anarchy;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
@@ -9,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import chav1961.nanochat.common.intern.InetAddressSelection;
 import chav1961.purelib.basic.exceptions.FlowException;
 import chav1961.purelib.basic.exceptions.LocalizationException;
 import chav1961.purelib.basic.exceptions.PreparationException;
@@ -27,11 +29,11 @@ import chav1961.purelib.ui.interfaces.RefreshMode;
 public class TheSameFirstForm implements FormManager<Object,TheSameFirstForm>, ModuleAccessor {
 	public final UUID			id = UUID.randomUUID();
 	@LocaleResource(value="TheSameFirstForm.name",tooltip="TheSameFirstForm.name.tt")
-	@Format("30m")
+	@Format("30ms")
 	public String				name = System.getProperty("user.name");
 	
 	@LocaleResource(value="TheSameFirstForm.district",tooltip="TheSameFirstForm.district.tt")
-	@Format("30m")
+	@Format("30ms")
 	public String				district = "Одуванчики";
 
 	@LocaleResource(value="TheSameFirstForm.lang",tooltip="TheSameFirstForm.lang.tt")
@@ -89,40 +91,19 @@ public class TheSameFirstForm implements FormManager<Object,TheSameFirstForm>, M
 		try{for (NetworkInterface netInt : Collections.list(NetworkInterface.getNetworkInterfaces())) {
 				if (!netInt.isLoopback() && netInt.isUp()) {
 					for (InterfaceAddress interfAddress : netInt.getInterfaceAddresses()) {
-						final InetAddress	broadcast = interfAddress.getBroadcast();
+						final InetAddress	address = interfAddress.getBroadcast();
 						
-						result.add(new InetAddressSelection(broadcast != null, broadcast != null ? broadcast : interfAddress.getAddress()));
+						if (address instanceof Inet4Address) {
+							final InetAddress	broadcast = interfAddress.getBroadcast();
+							
+							result.add(new InetAddressSelection(broadcast != null, broadcast != null ? broadcast : address));
+						}
 			        }
 				}
 			}
 			return result.toArray(new ItemAndSelection[result.size()]);
 		} catch (SocketException e) {
 			throw new PreparationException(e.getLocalizedMessage(), e);
-		}
-	}
-	
-	private static class InetAddressSelection implements ItemAndSelection<InetAddress> {
-		private final InetAddress	address;
-		private boolean				state;
-		
-		public InetAddressSelection(final boolean state, final InetAddress address) {
-			this.address = address;
-			this.state = state;
-		}
-
-		@Override
-		public boolean isSelected() {
-			return state;
-		}
-
-		@Override
-		public void setSelected(final boolean selected) {
-			this.state = selected;
-		}
-
-		@Override
-		public InetAddress getItem() {
-			return address;
 		}
 	}
 }

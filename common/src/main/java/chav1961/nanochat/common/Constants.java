@@ -14,6 +14,9 @@ public class Constants {
 	public static final String	PROP_GENERAL_DISCOVERY_PORT = "discoveryPort";
 	public static final String	PROP_GENERAL_DISCOVERY_MAINTENANCE_TIME = "discoveryMaintenanceTime";
 	public static final String	PROP_GENERAL_TCP_PORT = "tcpPort";
+	public static final String	PROP_GENERAL_HTTP_PORT = "httpPort";
+	public static final String	PROP_GENERAL_USE_BAND_MODE = "bandMode";
+	public static final String	PROP_GENERAL_USE_MAFIA_MODE = "mafiaMode";
 
 	public static final String	PROP_ANARCH = "anarch";
 	public static final String	PROP_ANARCH_SUBNETS = "subnets";

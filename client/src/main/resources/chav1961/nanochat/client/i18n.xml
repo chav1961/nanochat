@@ -11,15 +11,22 @@
 <!-- Localization of tray menu  -->	
 		<key name="traymenu.settings">Settings</key>
 		<key name="traymenu.settings.tt">Settings</key>
+		<key name="traymenu.languages">Languages</key>
+		<key name="traymenu.languages.tt">Interface language</key>
 		<key name="traymenu.exit">Exit</key>
 		<key name="traymenu.exit.tt">Exit</key>
+		<key name="traymenu.paused">Do not disturb!</key> 
+		<key name="traymenu.paused.tt">I'm left</key>
+		<key name="traymenu.notification">System notifications</key>
+		<key name="traymenu.notification.tt">System notifications</key>
+		
 	
 <!-- Localization of TheSameFirstTab class  -->	
 		<key name="TheSameFirstTab.caption">First start</key>
 		<key name="TheSameFirstTab.description">Вы запускаете Nano Chat на вашем компьютере первый раз</key>
 		<key name="TheSameFirstTab.help">Укажите подсетку и назовите тусовку</key>
 
-<!-- Localization of TheSameFirstForm class  -->
+<!-- Localization of TheSameFirstForm class -->
 		<key name="TheSameFirstForm.caption">Самый первый запуск</key>
 		<key name="TheSameFirstForm.caption.tt">Самый первый запуск</key>
 		<key name="TheSameFirstForm.help">Самый первый запуск</key>
@@ -33,6 +40,40 @@
 		<key name="TheSameFirstForm.addr.tt">В каких подсетях будут автоматически искаться тусовка</key>
 		<key name="TheSameFirstForm.useEn">Английское меню в трее</key>
 		<key name="TheSameFirstForm.useEn.tt">Если ваша ОС по умолчанию не настроена на русский язык, включить этот флажок, иначе в меню трея будут крякозябры вместо букв</key>
+
+<!-- Localization of GeneralForm class -->	
+		<key name="GeneralForm.caption">Общие</key>
+		<key name="GeneralForm.caption.tt">Общие настройки</key>
+		<key name="GeneralForm.help">Общие настройки</key>
+		<key name="GeneralForm.name">Погоняло</key>
+		<key name="GeneralForm.name.tt">Под этим именем вас будут видеть в тусовке</key>
+		<key name="GeneralForm.district">Тусовка</key>
+		<key name="GeneralForm.district.tt">В этой тусовке вас будут видеть</key>
+		<key name="GeneralForm.lang">Язык при запуске</key>
+		<key name="GeneralForm.lang.tt">На каком языке будет работать интерфейс при запуске</key>
+		<key name="GeneralForm.useEn">Английское меню в трее</key>
+		<key name="GeneralForm.useEn.tt">Если ваша ОС по умолчанию не настроена на русский язык, включить этот флажок, иначе в меню трея будут крякозябры вместо букв</key>
+		<key name="GeneralForm.bandMode">Включить режим шайки</key>
+		<key name="GeneralForm.bandMode.tt">Создать новую шайку или попроситься в существующую</key>
+		<key name="GeneralForm.mafiaMode">Включить режим мафии</key>
+		<key name="GeneralForm.mafiaMode.tt">Присоединиться к мафии</key>
+		<key name="GeneralForm.addr">Смотреть подсети</key>
+		<key name="GeneralForm.addr.tt">В каких подсетях будут автоматически искаться тусовка</key>
+		<key name="GeneralForm.turnBand">Вкл. режим Шайки</key>
+		<key name="GeneralForm.turnBand.tt">Вкл. режим Шайки</key>
+		<key name="GeneralForm.turnMafia">Вкл. режим Мафии</key>
+		<key name="GeneralForm.turnMafia.tt">Вкл. режим Мафии</key>
+
+
+<!-- Localization of BandForm class -->	
+		<key name="BandForm.caption">Шайка</key>
+		<key name="BandForm.caption.tt">Настройки режима шайки</key>
+		<key name="BandForm.help">Настройки режима шайки</key>
+		
+<!-- Localization of MafiaForm class -->	
+		<key name="MafiaForm.caption">Мафия</key>
+		<key name="MafiaForm.help">Настройки режима мафии</key>
+		<key name="MafiaForm.caption.tt">Настройки режима мафии</key>
 		 
 	</lang>
 	<lang name="ru">
@@ -46,8 +87,14 @@
 <!-- Локализация меню трея-->	
 		<key name="traymenu.settings">Настройки</key>
 		<key name="traymenu.settings.tt">Настройки</key>
+		<key name="traymenu.languages">Язык</key>
+		<key name="traymenu.languages.tt">Язык интерфейса</key>
 		<key name="traymenu.exit">Выход</key>
 		<key name="traymenu.exit.tt">Завершить работу</key>
+		<key name="traymenu.paused">Меня нет!</key> 
+		<key name="traymenu.paused.tt">Меня нет!</key>
+		<key name="traymenu.notification">Уведомления</key>
+		<key name="traymenu.notification.tt">Системные уведомления</key>
 
 <!-- Локализация класса TheSameFirstTab -->	
 		<key name="TheSameFirstTab.caption">Первый запуск</key>
@@ -68,6 +115,39 @@
 		<key name="TheSameFirstForm.addr.tt">В каких подсетях будут автоматически искаться тусовка</key>
 		<key name="TheSameFirstForm.useEn">Английское меню в трее</key>
 		<key name="TheSameFirstForm.useEn.tt">Если ваша ОС по умолчанию не настроена на русский язык, включить этот флажок, иначе в меню трея будут крякозябры вместо букв</key>
+		
+<!-- Локализация класса GeneralForm -->	
+		<key name="GeneralForm.caption">Общие</key>
+		<key name="GeneralForm.caption.tt">Общие настройки</key>
+		<key name="GeneralForm.help">Общие настройки</key>
+		<key name="GeneralForm.name">Погоняло</key>
+		<key name="GeneralForm.name.tt">Под этим именем вас будут видеть в тусовке</key>
+		<key name="GeneralForm.district">Тусовка</key>
+		<key name="GeneralForm.district.tt">В этой тусовке вас будут видеть</key>
+		<key name="GeneralForm.lang">Язык при запуске</key>
+		<key name="GeneralForm.lang.tt">На каком языке будет работать интерфейс при запуске</key>
+		<key name="GeneralForm.useEn">Английское меню в трее</key>
+		<key name="GeneralForm.useEn.tt">Если ваша ОС по умолчанию не настроена на русский язык, включить этот флажок, иначе в меню трея будут крякозябры вместо букв</key>
+		<key name="GeneralForm.bandMode">Включить режим шайки</key>
+		<key name="GeneralForm.bandMode.tt">Создать новую шайку или попроситься в существующую</key>
+		<key name="GeneralForm.mafiaMode">Включить режим мафии</key>
+		<key name="GeneralForm.mafiaMode.tt">Присоединиться к мафии</key>
+		<key name="GeneralForm.addr">Смотреть подсети</key>
+		<key name="GeneralForm.addr.tt">В каких подсетях будут автоматически искаться тусовка</key>
+		<key name="GeneralForm.turnBand">Вкл. режим Шайки</key>
+		<key name="GeneralForm.turnBand.tt">Вкл. режим Шайки</key>
+		<key name="GeneralForm.turnMafia">Вкл. режим Мафии</key>
+		<key name="GeneralForm.turnMafia.tt">Вкл. режим Мафии</key>
+		
+<!-- Локализация класса BandForm -->	
+		<key name="BandForm.caption">Шайка</key>
+		<key name="BandForm.caption.tt">Настройки режима шайки</key>
+		<key name="BandForm.help">Настройки режима шайки</key>
+		
+<!-- Локализация класса MafiaForm -->	
+		<key name="MafiaForm.caption">Мафия</key>
+		<key name="MafiaForm.help">Настройки режима мафии</key>
+		<key name="MafiaForm.caption.tt">Настройки режима мафии</key>
 		
 	</lang>	
 </localization>

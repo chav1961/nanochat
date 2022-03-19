@@ -1,5 +1,6 @@
 package chav1961.nanochat.client;
 
+import java.awt.Dimension;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -9,6 +10,8 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -21,6 +24,7 @@ import javax.swing.JPopupMenu;
 import chav1961.nanochat.client.anarchy.SingleWizardStep;
 import chav1961.nanochat.client.anarchy.TheSameFirstForm;
 import chav1961.nanochat.client.anarchy.TheSameFirstTab;
+import chav1961.nanochat.client.settings.SettingsWindow;
 import chav1961.nanochat.common.Constants;
 import chav1961.nanochat.common.NanoChatUtils;
 import chav1961.purelib.basic.PureLibSettings;
@@ -28,10 +32,14 @@ import chav1961.purelib.basic.SubstitutableProperties;
 import chav1961.purelib.basic.exceptions.ContentException;
 import chav1961.purelib.basic.exceptions.EnvironmentException;
 import chav1961.purelib.basic.exceptions.LocalizationException;
+import chav1961.purelib.basic.exceptions.PreparationException;
 import chav1961.purelib.basic.interfaces.LoggerFacade.Severity;
 import chav1961.purelib.i18n.interfaces.Localizer;
+import chav1961.purelib.i18n.interfaces.Localizer.LocaleChangeListener;
+import chav1961.purelib.i18n.interfaces.SupportedLanguages;
 import chav1961.purelib.model.ContentModelFactory;
 import chav1961.purelib.model.interfaces.ContentMetadataInterface;
+import chav1961.purelib.nanoservice.NanoServiceFactory;
 import chav1961.purelib.net.LightWeightDiscovery;
 import chav1961.purelib.net.LightWeightDiscovery.PortBroadcastGenerator;
 import chav1961.purelib.ui.interfaces.ErrorProcessing;
@@ -42,30 +50,96 @@ import chav1961.purelib.ui.swing.useful.JDialogContainer;
 import chav1961.purelib.ui.swing.useful.JLocalizedOptionPane;
 import chav1961.purelib.ui.swing.useful.JSystemTray;
 
-public class Application {
+public class Application implements AutoCloseable, LocaleChangeListener {
 	public static final String	KEY_APPLICATION_NAME = "application.name";
 	public static final String	KEY_APPLICATION_TOOLTIP = "application.name.tt";
 	public static final String	KEY_APPLICATION_STARTED = "application.started";
 	public static final String	KEY_APPLICATION_CONFIRM_EXIT = "application.confirm.exit";
 	public static final String	KEY_APPLICATION_CONFIRM_EXIT_TITLE = "application.confirm.exit.title";
 
+	private static final SubstitutableProperties	DEFAULT_PROPS = new SubstitutableProperties();
+	
+	static {
+		try(final InputStream	is = Application.class.getResourceAsStream("/nanochat.client.default.properties")) {
+			
+			DEFAULT_PROPS.load(is);
+		} catch (IOException e) {
+			throw new PreparationException(e.getLocalizedMessage(), e);
+		}
+	}
+	
 	private final ContentMetadataInterface	mdi;
 	private final Localizer					localizer;
 	private final SubstitutableProperties	props;
+	private final JPopupMenu				popup;	
+	private final JSystemTray				tray;
 	private final CountDownLatch			latch = new CountDownLatch(1);
 
-	private Application(final ContentMetadataInterface mdi, final Localizer localizer, final SubstitutableProperties props) {
+	private Application(final ContentMetadataInterface mdi, final Localizer localizer, final SubstitutableProperties props) throws EnvironmentException {
 		this.mdi = mdi;
 		this.localizer = localizer;
 		this.props = props;
+
+		this.popup = SwingUtils.toJComponent(mdi.byUIPath(URI.create("ui:/model/navigation.top.traymenu")),JPopupMenu.class);
+		SwingUtils.assignActionListeners(popup,this);
+		
+		this.tray = new JSystemTray(localizer, KEY_APPLICATION_NAME, URI.create("root://"+Application.class.getName()+"/images/trayicon.png"), KEY_APPLICATION_TOOLTIP, popup, props.getProperty(Constants.PROP_GENERAL_TRAY_LANG_EN, boolean.class));
+		this.tray.addActionListener((e)->browseScreen());
+		localizer.addLocaleChangeListener(this);
 	}
 	
+	@Override
+	public void close() throws EnvironmentException {
+		localizer.removeLocaleChangeListener(this);
+		tray.close();
+	}
+
+	@Override
+	public void localeChanged(final Locale oldLocale, final Locale newLocale) throws LocalizationException {
+		tray.localeChanged(oldLocale, newLocale);
+	}
+
+	public JSystemTray getTray() {
+		return tray;
+	}
+
+	private void browseScreen() {
+		
+	}
+
+	@OnAction("action:/paused")
+	private void paused(final Hashtable<String,String[]> langs) throws LocalizationException {
+		System.err.println("Paused");
+	}
+	
+	@OnAction("action:/notification")
+	private void notification(final Hashtable<String,String[]> langs) throws LocalizationException {
+		System.err.println("Notification");
+	}
 	
 	@OnAction("action:/settings")
 	private void settings() {
-		System.err.println("SDLKLasdkaskdl;kasdl;k");
+		try {
+			final SettingsWindow	w = new SettingsWindow(mdi, localizer, PureLibSettings.CURRENT_LOGGER, props);
+			final JDialogContainer<SettingsWindow, SingleWizardStep, JComponent>	container = new JDialogContainer<SettingsWindow, SingleWizardStep, JComponent>(localizer, (JFrame)null, KEY_APPLICATION_NAME, w); 
+			
+			container.setSize(800, 600);
+			if (container.showDialog()) {
+				w.commit();
+				saveSettings();
+			}			
+		} catch (ContentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
+	@OnAction("action:builtin:/builtin.languages")
+	private void selectLang(final Hashtable<String,String[]> langs) throws LocalizationException {
+		PureLibSettings.PURELIB_LOCALIZER.setCurrentLocale(SupportedLanguages.valueOf(langs.get("lang")[0]).getLocale());
+	}
+	
+	
 	@OnAction("action:/exit")
 	private void exit() {
 		if (new JLocalizedOptionPane(localizer).confirm(null, KEY_APPLICATION_CONFIRM_EXIT, KEY_APPLICATION_CONFIRM_EXIT_TITLE, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
@@ -83,7 +157,7 @@ public class Application {
 	}
 
 	private void await() {
-		try{
+		try{tray.message(Severity.info, localizer.getValue(KEY_APPLICATION_STARTED));
 			latch.await();
 		} catch (InterruptedException e) {
 			saveSettings();
@@ -93,14 +167,14 @@ public class Application {
 	public static void main(String[] args) {
 		try(final Localizer	localizer = Localizer.Factory.newInstance(URI.create(Localizer.LOCALIZER_SCHEME+":xml:root://"+Application.class.getName()+"/chav1961/nanochat/client/i18n.xml"))) {
 			final ContentMetadataInterface	mdi = ContentModelFactory.forXmlDescription(Application.class.getResourceAsStream("application.xml"));
-
+			
 			PureLibSettings.PURELIB_LOCALIZER.push(localizer);
 			
 			if (!Constants.NANOCHAT_CONFIG.exists()) {
 				firstRun(mdi, localizer, Constants.NANOCHAT_CONFIG);
 			}
 			else {
-				final SubstitutableProperties	props = new SubstitutableProperties();
+				final SubstitutableProperties	props = new SubstitutableProperties(DEFAULT_PROPS);
 				
 				try(final InputStream	is = new FileInputStream(Constants.NANOCHAT_CONFIG)) {
 					props.load(is);
@@ -116,7 +190,7 @@ public class Application {
 
 	private static void firstRun(final ContentMetadataInterface mdi, final Localizer localizer, final File configFile) throws ContentException {
 		final TheSameFirstTab			tab = new TheSameFirstTab(localizer, PureLibSettings.CURRENT_LOGGER);
-		final SubstitutableProperties	props = new SubstitutableProperties();
+		final SubstitutableProperties	props = new SubstitutableProperties(DEFAULT_PROPS);
 		final ErrorProcessing<TheSameFirstTab, SingleWizardStep> ep = new ErrorProcessing<TheSameFirstTab, SingleWizardStep>() {
 											@Override
 											public void processWarning(final TheSameFirstTab content, final SingleWizardStep err, final Object... parameters) throws LocalizationException {
@@ -133,7 +207,7 @@ public class Application {
 			props.setProperty(Constants.PROP_GENERAL_DEFAULT_LANG, form.lang.name());
 			props.setProperty(Constants.PROP_GENERAL_TRAY_LANG_EN, form.useEn ? "true" : "false");
 			
-			props.setProperty(Constants.PROP_ANARCH_SUBNETS, Arrays.toString(ItemAndSelection.extract(true, form.addr)));
+			props.setProperty(Constants.PROP_ANARCH_SUBNETS, NanoChatUtils.itemAndSelection2String(form.addr));
 			props.setProperty(Constants.PROP_ANARCH_DISTRICT, form.district);
 			
 			NanoChatUtils.prepareNanoChatDirectory(Constants.NANOCHAT_DIRECTORY);
@@ -151,21 +225,16 @@ public class Application {
 	}
 
 	private static void ordinalRun(final ContentMetadataInterface mdi, final Localizer localizer, final SubstitutableProperties props) throws IOException {
-		final Application	app = new Application(mdi, localizer, props);
-		final JPopupMenu	popup = SwingUtils.toJComponent(mdi.byUIPath(URI.create("ui:/model/navigation.top.traymenu")),JPopupMenu.class);
 		final Set<String>	names = new HashSet<>();
-		final int			discoveryPort = props.getProperty(Constants.PROP_GENERAL_DISCOVERY_PORT, int.class, "13666");
-		final int			tcpPort = props.getProperty(Constants.PROP_GENERAL_DISCOVERY_PORT, int.class, "13667");
-		final int			maintenanceTime = props.getProperty(Constants.PROP_GENERAL_DISCOVERY_MAINTENANCE_TIME, int.class, "30");
+		final int			discoveryPort = props.getProperty(Constants.PROP_GENERAL_DISCOVERY_PORT, int.class);
+		final int			tcpPort = props.getProperty(Constants.PROP_GENERAL_DISCOVERY_PORT, int.class);
+		final int			maintenanceTime = props.getProperty(Constants.PROP_GENERAL_DISCOVERY_MAINTENANCE_TIME, int.class);
 
-		SwingUtils.assignActionListeners(popup,app);
 		names.add(props.getProperty(Constants.PROP_ANARCH_DISTRICT));
 		
-		try(final JSystemTray			tray = new JSystemTray(localizer, KEY_APPLICATION_NAME, URI.create("root://"+Application.class.getName()+"/images/trayicon.png"), KEY_APPLICATION_TOOLTIP, popup, props.getProperty(Constants.PROP_GENERAL_TRAY_LANG_EN, boolean.class));
+		try(final Application			app = new Application(mdi, localizer, props);
 			final LightWeightDiscovery	discovery = new LightWeightDiscovery(props.getProperty(Constants.PROP_GENERAL_ID, UUID.class), names, discoveryPort, tcpPort, (p,t)->false, maintenanceTime)) {
 			
-			tray.addActionListener((e)->app.settings());
-			tray.message(Severity.info, localizer.getValue(KEY_APPLICATION_STARTED));
 			app.await();
 		} catch (EnvironmentException e) {
 			throw new IOException(e.getLocalizedMessage(), e);
