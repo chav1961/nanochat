@@ -33,6 +33,7 @@ public class SettingsWindow extends JTabbedPane implements NodeMetadataOwner, Lo
 	private final GeneralTab				generalTab;
 	private BandTab							bandTab = null;
 	private MafiaTab						mafiaTab = null;
+	private final NetworkTab				networkTab;
 	
 	public SettingsWindow(final ContentMetadataInterface mdi, final Localizer localizer, final LoggerFacade logger, final SubstitutableProperties props) throws NullPointerException, ContentException {
 		if (mdi == null) {
@@ -52,20 +53,21 @@ public class SettingsWindow extends JTabbedPane implements NodeMetadataOwner, Lo
 			this.localizer = localizer;
 			this.logger = logger;
 			this.props = props;
-			this.generalTab = new GeneralTab(this, localizer, props);
 
+			this.generalTab = new GeneralTab(this, localizer, props);
 			placeTab(this.generalTab);
 			
 			if (props.getProperty(Constants.PROP_GENERAL_USE_BAND_MODE, boolean.class)) {
 				this.bandTab = new BandTab(this, localizer, props);
-
 				placeTab(this.bandTab);
 			}
 			if (props.getProperty(Constants.PROP_GENERAL_USE_MAFIA_MODE, boolean.class)) {
 				this.mafiaTab = new MafiaTab(this, localizer, props);
-
 				placeTab(this.mafiaTab);
 			}
+			this.networkTab = new NetworkTab(this, localizer, props);
+			placeTab(this.networkTab);
+			
 			setSelectedIndex(0);
 		}
 	}

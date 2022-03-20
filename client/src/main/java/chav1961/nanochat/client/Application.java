@@ -1,6 +1,8 @@
 package chav1961.nanochat.client;
 
+import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.TrayIcon;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -28,11 +30,13 @@ import chav1961.nanochat.client.settings.SettingsWindow;
 import chav1961.nanochat.common.Constants;
 import chav1961.nanochat.common.NanoChatUtils;
 import chav1961.purelib.basic.PureLibSettings;
+import chav1961.purelib.basic.SimpleTimerTask;
 import chav1961.purelib.basic.SubstitutableProperties;
 import chav1961.purelib.basic.exceptions.ContentException;
 import chav1961.purelib.basic.exceptions.EnvironmentException;
 import chav1961.purelib.basic.exceptions.LocalizationException;
 import chav1961.purelib.basic.exceptions.PreparationException;
+import chav1961.purelib.basic.exceptions.SyntaxException;
 import chav1961.purelib.basic.interfaces.LoggerFacade.Severity;
 import chav1961.purelib.i18n.interfaces.Localizer;
 import chav1961.purelib.i18n.interfaces.Localizer.LocaleChangeListener;
@@ -74,22 +78,28 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 	private final JPopupMenu				popup;	
 	private final JSystemTray				tray;
 	private final CountDownLatch			latch = new CountDownLatch(1);
+	private final NanoServiceFactory		nanoService;
 
-	private Application(final ContentMetadataInterface mdi, final Localizer localizer, final SubstitutableProperties props) throws EnvironmentException {
+	private Application(final ContentMetadataInterface mdi, final Localizer localizer, final SubstitutableProperties props) throws EnvironmentException, SyntaxException, NullPointerException, ContentException, IOException {
 		this.mdi = mdi;
 		this.localizer = localizer;
 		this.props = props;
-
+		
 		this.popup = SwingUtils.toJComponent(mdi.byUIPath(URI.create("ui:/model/navigation.top.traymenu")),JPopupMenu.class);
 		SwingUtils.assignActionListeners(popup,this);
 		
 		this.tray = new JSystemTray(localizer, KEY_APPLICATION_NAME, URI.create("root://"+Application.class.getName()+"/images/trayicon.png"), KEY_APPLICATION_TOOLTIP, popup, props.getProperty(Constants.PROP_GENERAL_TRAY_LANG_EN, boolean.class));
 		this.tray.addActionListener((e)->browseScreen());
 		localizer.addLocaleChangeListener(this);
+		this.nanoService = new NanoServiceFactory(PureLibSettings.CURRENT_LOGGER, props);
 	}
 	
 	@Override
 	public void close() throws EnvironmentException {
+		try{nanoService.close();
+		} catch (IOException e) {
+			tray.message(Severity.severe, e.getLocalizedMessage());
+		}
 		localizer.removeLocaleChangeListener(this);
 		tray.close();
 	}
@@ -104,7 +114,21 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 	}
 
 	private void browseScreen() {
+		browseScreen("gui");
+	}
+
+	private void browseScreen(final String address) {
+		final String	uri = "http://localhost:"+props.getProperty(NanoServiceFactory.NANOSERVICE_PORT)+address;
 		
+		if (Desktop.isDesktopSupported()) {
+			try{Desktop.getDesktop().browse(URI.create(uri));
+			} catch (IOException exc) {
+				tray.message(Severity.error, "Errir starting browser on ["+uri+"] : "+exc.getLocalizedMessage());
+			}
+		}
+		else {
+			tray.message(Severity.error, "No desktop support on your computer. Try to type ["+uri+"] manually in your browser address string");
+		}
 	}
 
 	@OnAction("action:/paused")
@@ -156,11 +180,14 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 		}
 	}
 
-	private void await() {
-		try{tray.message(Severity.info, localizer.getValue(KEY_APPLICATION_STARTED));
+	private void await() throws IOException {
+		try{nanoService.start();
+			tray.message(Severity.info, localizer.getValue(KEY_APPLICATION_STARTED));
 			latch.await();
 		} catch (InterruptedException e) {
 			saveSettings();
+		} finally {
+			nanoService.stop();
 		}
 	}
 	
@@ -178,7 +205,7 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 				
 				try(final InputStream	is = new FileInputStream(Constants.NANOCHAT_CONFIG)) {
 					props.load(is);
-					ordinalRun(mdi, localizer, props);
+					ordinalRun(mdi, localizer, props, false);
 				} catch (IOException e) {
 					firstRun(mdi, localizer, Constants.NANOCHAT_CONFIG);
 				}
@@ -214,7 +241,7 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 			try(final OutputStream	fos = new FileOutputStream(Constants.NANOCHAT_CONFIG)) {
 				
 				props.store(fos, "");
-				ordinalRun(mdi, localizer, props);
+				ordinalRun(mdi, localizer, props, true);
 			} catch (IOException e) {
 				throw new ContentException(e.getLocalizedMessage(), e); 
 			}
@@ -224,7 +251,7 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 		}
 	}
 
-	private static void ordinalRun(final ContentMetadataInterface mdi, final Localizer localizer, final SubstitutableProperties props) throws IOException {
+	private static void ordinalRun(final ContentMetadataInterface mdi, final Localizer localizer, final SubstitutableProperties props, final boolean startHelp) throws IOException {
 		final Set<String>	names = new HashSet<>();
 		final int			discoveryPort = props.getProperty(Constants.PROP_GENERAL_DISCOVERY_PORT, int.class);
 		final int			tcpPort = props.getProperty(Constants.PROP_GENERAL_DISCOVERY_PORT, int.class);
@@ -234,9 +261,12 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 		
 		try(final Application			app = new Application(mdi, localizer, props);
 			final LightWeightDiscovery	discovery = new LightWeightDiscovery(props.getProperty(Constants.PROP_GENERAL_ID, UUID.class), names, discoveryPort, tcpPort, (p,t)->false, maintenanceTime)) {
-			
+
+			if (startHelp) {
+				SimpleTimerTask.start(()->app.browseScreen("/static/index.cre"), 1000);
+			}
 			app.await();
-		} catch (EnvironmentException e) {
+		} catch (EnvironmentException | ContentException e) {
 			throw new IOException(e.getLocalizedMessage(), e);
 		}
 	}

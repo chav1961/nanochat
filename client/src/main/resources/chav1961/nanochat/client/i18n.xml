@@ -74,6 +74,18 @@
 		<key name="MafiaForm.caption">Мафия</key>
 		<key name="MafiaForm.help">Настройки режима мафии</key>
 		<key name="MafiaForm.caption.tt">Настройки режима мафии</key>
+
+<!-- Localization of NetworkForm class -->	
+		<key name="NetworkForm.caption">Сеть</key>
+		<key name="NetworkForm.caption.tt">Специфичные сетевые настройки</key>
+		<key name="NetworkForm.discoveryPort">Порт discovery</key>
+		<key name="NetworkForm.discoveryPort.tt">По этому порту вас будут искать в сети</key>
+		<key name="NetworkForm.tcpPort">Порт TCP</key>
+		<key name="NetworkForm.tcpPort.tt">По этому порту вы будете организатором сходок</key>
+		<key name="NetworkForm.httpPort">Порт UI</key>
+		<key name="NetworkForm.httpPort.tt">По этому порту вы будете подключаться к приложения из браузера</key>
+		<key name="NetworkForm.discoveryMaintenanceTime">Период обслуживания (сек)</key>
+		<key name="NetworkForm.discoveryMaintenanceTime.tt">С такой периодичностью приложение будет контролировать состояние сети</key>
 		 
 	</lang>
 	<lang name="ru">
@@ -148,6 +160,18 @@
 		<key name="MafiaForm.caption">Мафия</key>
 		<key name="MafiaForm.help">Настройки режима мафии</key>
 		<key name="MafiaForm.caption.tt">Настройки режима мафии</key>
+		
+<!-- Локализация класса NetworkForm -->	
+		<key name="NetworkForm.caption">Сеть</key>
+		<key name="NetworkForm.caption.tt">Специфичные сетевые настройки</key>
+		<key name="NetworkForm.discoveryPort">Порт discovery</key>
+		<key name="NetworkForm.discoveryPort.tt">По этому порту вас будут искать в сети</key>
+		<key name="NetworkForm.tcpPort">Порт TCP</key>
+		<key name="NetworkForm.tcpPort.tt">По этому порту вы будете организатором сходок</key>
+		<key name="NetworkForm.httpPort">Порт UI</key>
+		<key name="NetworkForm.httpPort.tt">По этому порту вы будете подключаться к приложения из браузера</key>
+		<key name="NetworkForm.discoveryMaintenanceTime">Период обслуживания (сек)</key>
+		<key name="NetworkForm.discoveryMaintenanceTime.tt">С такой периодичностью приложение будет контролировать состояние сети</key>
 		
 	</lang>	
 </localization>
