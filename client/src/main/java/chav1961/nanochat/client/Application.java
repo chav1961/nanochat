@@ -1,8 +1,6 @@
 package chav1961.nanochat.client;
 
 import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.TrayIcon;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -15,7 +13,6 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JComponent;
@@ -26,6 +23,7 @@ import javax.swing.JPopupMenu;
 import chav1961.nanochat.client.anarchy.SingleWizardStep;
 import chav1961.nanochat.client.anarchy.TheSameFirstForm;
 import chav1961.nanochat.client.anarchy.TheSameFirstTab;
+import chav1961.nanochat.client.net.ClientDiscovery;
 import chav1961.nanochat.client.settings.SettingsWindow;
 import chav1961.nanochat.common.Constants;
 import chav1961.nanochat.common.NanoChatUtils;
@@ -44,10 +42,7 @@ import chav1961.purelib.i18n.interfaces.SupportedLanguages;
 import chav1961.purelib.model.ContentModelFactory;
 import chav1961.purelib.model.interfaces.ContentMetadataInterface;
 import chav1961.purelib.nanoservice.NanoServiceFactory;
-import chav1961.purelib.net.LightWeightDiscovery;
-import chav1961.purelib.net.LightWeightDiscovery.PortBroadcastGenerator;
 import chav1961.purelib.ui.interfaces.ErrorProcessing;
-import chav1961.purelib.ui.interfaces.ItemAndSelection;
 import chav1961.purelib.ui.swing.SwingUtils;
 import chav1961.purelib.ui.swing.interfaces.OnAction;
 import chav1961.purelib.ui.swing.useful.JDialogContainer;
@@ -260,7 +255,7 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 		names.add(props.getProperty(Constants.PROP_ANARCH_DISTRICT));
 		
 		try(final Application			app = new Application(mdi, localizer, props);
-			final LightWeightDiscovery	discovery = new LightWeightDiscovery(props.getProperty(Constants.PROP_GENERAL_ID, UUID.class), names, discoveryPort, tcpPort, (p,t)->false, maintenanceTime)) {
+			final ClientDiscovery		discovery = new ClientDiscovery(props)) {
 
 			if (startHelp) {
 				SimpleTimerTask.start(()->app.browseScreen("/static/index.cre"), 1000);
@@ -268,15 +263,6 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 			app.await();
 		} catch (EnvironmentException | ContentException e) {
 			throw new IOException(e.getLocalizedMessage(), e);
-		}
-	}
-
-
-	private static class BroadcastGeneratorImpl implements PortBroadcastGenerator {
-		@Override
-		public boolean enumeratePorts(final int portNumber, final int timeout) {
-			// TODO Auto-generated method stub
-			return false;
 		}
 	}
 }

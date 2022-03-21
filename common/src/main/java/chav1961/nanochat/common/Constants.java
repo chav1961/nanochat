@@ -18,6 +18,7 @@ public class Constants {
 	public static final String	PROP_GENERAL_USE_BAND_MODE = "bandMode";
 	public static final String	PROP_GENERAL_USE_MAFIA_MODE = "mafiaMode";
 
+	public static final String	PROP_GENERAL_DISCOVERY_RECORD_SIZE = "discoveryRecordSize";
 	public static final String	PROP_ANARCH = "anarch";
 	public static final String	PROP_ANARCH_SUBNETS = "subnets";
 	public static final String	PROP_ANARCH_DISTRICT = "district";
