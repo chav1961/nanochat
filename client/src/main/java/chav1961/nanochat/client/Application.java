@@ -109,7 +109,7 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 	}
 
 	private void browseScreen() {
-		browseScreen("gui");
+		browseScreen("/gui/index");
 	}
 
 	private void browseScreen(final String address) {
