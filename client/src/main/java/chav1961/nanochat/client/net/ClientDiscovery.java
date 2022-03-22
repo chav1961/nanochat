@@ -4,9 +4,9 @@ import java.io.IOException;
 
 import chav1961.nanochat.common.Constants;
 import chav1961.purelib.basic.SubstitutableProperties;
-import chav1961.purelib.net.LightWeightDiscovery;
+import chav1961.purelib.net.LightWeightNetworkDiscovery;
 
-public class ClientDiscovery extends LightWeightDiscovery<BroadcastInfo, QueryInfo> {
+public class ClientDiscovery extends LightWeightNetworkDiscovery<BroadcastInfo, QueryInfo> {
 	private final SubstitutableProperties	props;
 	
 	public ClientDiscovery(final SubstitutableProperties props) throws IOException {
