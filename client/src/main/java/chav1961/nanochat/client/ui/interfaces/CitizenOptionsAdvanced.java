@@ -1,9 +1,11 @@
 package chav1961.nanochat.client.ui.interfaces;
 
 import chav1961.nanochat.client.ui.UIUtils;
+import chav1961.purelib.basic.exceptions.ContentException;
+import chav1961.purelib.json.JsonSerializer;
 import chav1961.purelib.model.interfaces.ContentMetadataInterface.ContentNodeMetadata;
 
-public enum CitizenOptionsAdvanced implements UIOptionValueInterface<CitizenOptions> {
+public enum CitizenOptionsAdvanced implements UIOptionValueInterface<CitizenOptions>, JavaScriptKeeper {
 	DISABLED(UIUtils.getMeta("ui:/model/navigation.top.traymenu"), true),
 	AVAILABLE(UIUtils.getMeta("ui:/model/navigation.top.traymenu"));
 
@@ -32,5 +34,12 @@ public enum CitizenOptionsAdvanced implements UIOptionValueInterface<CitizenOpti
 	@Override
 	public CitizenOptions getOwner() {
 		return CitizenOptions.ADVANCED;
+	}
+
+	@Override
+	public String getJavaScript() throws ContentException {
+		// TODO Auto-generated method stub
+	//	final JsonSerializer<ContentNodeMetadata>	ser = JsonSerializer.buildSerializer(ContentNodeMetadata.class);
+		return null;
 	}
 }
