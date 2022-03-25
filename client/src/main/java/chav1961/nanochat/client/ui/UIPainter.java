@@ -3,10 +3,13 @@ package chav1961.nanochat.client.ui;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.io.Writer;
 import java.util.List;
 
+import chav1961.purelib.basic.PureLibSettings;
 import chav1961.purelib.basic.Utils;
 import chav1961.purelib.basic.interfaces.LoggerFacade;
 import chav1961.purelib.basic.interfaces.LoggerFacadeOwner;
@@ -21,6 +24,7 @@ import chav1961.purelib.nanoservice.interfaces.QueryType;
 import chav1961.purelib.nanoservice.interfaces.RootPath;
 import chav1961.purelib.nanoservice.interfaces.ToBody;
 import chav1961.purelib.nanoservice.interfaces.ToHeader;
+import chav1961.purelib.streams.char2char.SubstitutableWriter;
 
 @RootPath("/gui")
 public class UIPainter implements Closeable, LoggerFacadeOwner {
@@ -58,8 +62,13 @@ public class UIPainter implements Closeable, LoggerFacadeOwner {
 	
 	@Path("/index")
 	public int printIndex(@ToBody(mimeType="text/html") final Writer os) throws IOException {
-		os.write("test string");
-		os.flush();
+		final SubstitutableWriter	sw = new SubstitutableWriter(os, this::indexSubstitutor);
+		
+		try(final InputStream	is = this.getClass().getResourceAsStream("/html/index.html");
+			final Reader		rdr = new InputStreamReader(is, PureLibSettings.DEFAULT_CONTENT_ENCODING)) {
+
+			Utils.copyStream(rdr, sw);
+		}
 		return 200;
 	}
 	
@@ -127,5 +136,8 @@ public class UIPainter implements Closeable, LoggerFacadeOwner {
 		Utils.copyStream(is, os);
 		return 200;
 	}
-	
+
+	private String indexSubstitutor(final String key) {
+		return key;
+	}
 }
