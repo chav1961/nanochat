@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import chav1961.nanochat.common.intern.InetAddressSelection;
+import chav1961.purelib.json.JsonSerializer;
 import chav1961.purelib.ui.interfaces.ItemAndSelection;
 
 public class NanoChatUtils {
@@ -58,5 +59,13 @@ public class NanoChatUtils {
 			}
 			return sb.substring(1);
 		}		
+	}
+	
+	public static <T> String toJsonString(final T instance, final JsonSerializer<T> serializer) {
+		final int		size = serializer.serialize(instance, null, 0, false);
+		final char[]	content = new char[size];
+		
+		serializer.serialize(instance, content, 0, true);
+		return new String(content);
 	}
 }

@@ -13,7 +13,7 @@ public class UIUtils {
 	public static final ContentMetadataInterface	UI_METADATA;
 
 	static {
-		try{UI_METADATA = ContentModelFactory.forXmlDescription(Application.class.getResourceAsStream("ui.xml"));
+		try{UI_METADATA = ContentModelFactory.forXmlDescription(UIUtils.class.getResourceAsStream("ui.xml"));
 		} catch (EnvironmentException e) {
 			throw new PreparationException(e.getLocalizedMessage(), e); 
 		}
