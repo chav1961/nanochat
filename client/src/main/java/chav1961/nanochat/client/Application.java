@@ -58,7 +58,7 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 	public static final String	KEY_APPLICATION_CONFIRM_EXIT = "application.confirm.exit";
 	public static final String	KEY_APPLICATION_CONFIRM_EXIT_TITLE = "application.confirm.exit.title";
 
-	public static final String	PATH_UI_PAINTER = "/ui/";
+	public static final String	PATH_UI_PAINTER = "/gui";
 	
 	private static final SubstitutableProperties	DEFAULT_PROPS = new SubstitutableProperties();
 	
@@ -118,7 +118,7 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 	}
 
 	private void browseScreen() {
-		browseScreen("/gui/index");
+		browseScreen(PATH_UI_PAINTER+"/index");
 	}
 
 	private void browseScreen(final String address) {
