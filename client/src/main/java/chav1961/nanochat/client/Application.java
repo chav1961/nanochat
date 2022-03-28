@@ -25,6 +25,7 @@ import chav1961.nanochat.client.anarchy.TheSameFirstForm;
 import chav1961.nanochat.client.anarchy.TheSameFirstTab;
 import chav1961.nanochat.client.net.ClientDiscovery;
 import chav1961.nanochat.client.settings.SettingsWindow;
+import chav1961.nanochat.client.ui.UIPainter;
 import chav1961.nanochat.common.Constants;
 import chav1961.nanochat.common.NanoChatUtils;
 import chav1961.purelib.basic.PureLibSettings;
@@ -36,6 +37,7 @@ import chav1961.purelib.basic.exceptions.LocalizationException;
 import chav1961.purelib.basic.exceptions.PreparationException;
 import chav1961.purelib.basic.exceptions.SyntaxException;
 import chav1961.purelib.basic.interfaces.LoggerFacade.Severity;
+import chav1961.purelib.fsys.interfaces.FileSystemInterface;
 import chav1961.purelib.i18n.interfaces.Localizer;
 import chav1961.purelib.i18n.interfaces.Localizer.LocaleChangeListener;
 import chav1961.purelib.i18n.interfaces.SupportedLanguages;
@@ -56,6 +58,8 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 	public static final String	KEY_APPLICATION_CONFIRM_EXIT = "application.confirm.exit";
 	public static final String	KEY_APPLICATION_CONFIRM_EXIT_TITLE = "application.confirm.exit.title";
 
+	public static final String	PATH_UI_PAINTER = "/ui/";
+	
 	private static final SubstitutableProperties	DEFAULT_PROPS = new SubstitutableProperties();
 	
 	static {
@@ -72,6 +76,7 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 	private final SubstitutableProperties	props;
 	private final JPopupMenu				popup;	
 	private final JSystemTray				tray;
+	private final UIPainter					painter;
 	private final CountDownLatch			latch = new CountDownLatch(1);
 	private final NanoServiceFactory		nanoService;
 
@@ -87,11 +92,15 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 		this.tray.addActionListener((e)->browseScreen());
 		localizer.addLocaleChangeListener(this);
 		this.nanoService = new NanoServiceFactory(PureLibSettings.CURRENT_LOGGER, props);
+		this.painter = new UIPainter(FileSystemInterface.Factory.newInstance(URI.create(FileSystemInterface.FILESYSTEM_URI_SCHEME+":file:./")), localizer, tray);
+		this.nanoService.deploy(PATH_UI_PAINTER, painter);
 	}
 	
 	@Override
 	public void close() throws EnvironmentException {
-		try{nanoService.close();
+		try{nanoService.undeploy(PATH_UI_PAINTER);
+			painter.close();
+			nanoService.close();
 		} catch (IOException e) {
 			tray.message(Severity.severe, e.getLocalizedMessage());
 		}
