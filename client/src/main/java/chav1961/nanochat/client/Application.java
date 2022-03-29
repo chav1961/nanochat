@@ -28,6 +28,7 @@ import chav1961.nanochat.client.settings.SettingsWindow;
 import chav1961.nanochat.client.ui.UIPainter;
 import chav1961.nanochat.common.Constants;
 import chav1961.nanochat.common.NanoChatUtils;
+import chav1961.purelib.basic.AndOrTree;
 import chav1961.purelib.basic.PureLibSettings;
 import chav1961.purelib.basic.SimpleTimerTask;
 import chav1961.purelib.basic.SubstitutableProperties;
