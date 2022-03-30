@@ -8,6 +8,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -246,13 +250,23 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 			try(final OutputStream	fos = new FileOutputStream(Constants.NANOCHAT_CONFIG)) {
 				
 				props.store(fos, "");
+				prepareDatabase();
 				ordinalRun(mdi, localizer, props, true);
-			} catch (IOException e) {
+			} catch (IOException | SQLException e) {
 				throw new ContentException(e.getLocalizedMessage(), e); 
 			}
 		}
 		else {
 			System.err.println("Cancel");
+		}
+	}
+
+	private static void prepareDatabase() throws SQLException {
+		// TODO Auto-generated method stub
+		try(final Connection	conn = DriverManager.getConnection("jdbc:sqlite:"+Constants.NANOCHAT_DATABASE.getAbsolutePath().replace(File.separatorChar, '/'));
+			final Statement		stmt = conn.createStatement()) {
+		
+			stmt.executeUpdate("create table if not exists test(id integer primary key, name text not null)");
 		}
 	}
 

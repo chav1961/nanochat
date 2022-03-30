@@ -5,6 +5,7 @@ import java.io.File;
 public class Constants {
 	public static final File	NANOCHAT_DIRECTORY = new File(System.getProperty("user.home"),"nanochat");
 	public static final File	NANOCHAT_CONFIG = new File(NANOCHAT_DIRECTORY,".nanochat");
+	public static final File	NANOCHAT_DATABASE = new File(NANOCHAT_DIRECTORY,"nanochat.db");
 	
 	public static final String	PROP_GENERAL = "general";
 	public static final String	PROP_GENERAL_ID = "uuid";
