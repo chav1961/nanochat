@@ -1,13 +1,17 @@
 package chav1961.nanochat.client;
 
+
 import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -27,6 +31,7 @@ import javax.swing.JPopupMenu;
 import chav1961.nanochat.client.anarchy.SingleWizardStep;
 import chav1961.nanochat.client.anarchy.TheSameFirstForm;
 import chav1961.nanochat.client.anarchy.TheSameFirstTab;
+import chav1961.nanochat.client.db.DbManager;
 import chav1961.nanochat.client.net.ClientDiscovery;
 import chav1961.nanochat.client.settings.SettingsWindow;
 import chav1961.nanochat.client.ui.UIPainter;
@@ -48,7 +53,14 @@ import chav1961.purelib.i18n.interfaces.Localizer.LocaleChangeListener;
 import chav1961.purelib.i18n.interfaces.SupportedLanguages;
 import chav1961.purelib.model.ContentModelFactory;
 import chav1961.purelib.model.interfaces.ContentMetadataInterface;
+import chav1961.purelib.model.interfaces.ContentMetadataInterface.ContentNodeMetadata;
+import chav1961.purelib.model.interfaces.NodeMetadataOwner;
 import chav1961.purelib.nanoservice.NanoServiceFactory;
+import chav1961.purelib.sql.model.SimpleDatabaseManager;
+import chav1961.purelib.sql.model.SimpleDatabaseModelManagement;
+import chav1961.purelib.sql.model.SimpleDottedVersion;
+import chav1961.purelib.sql.model.interfaces.DatabaseManagement;
+import chav1961.purelib.sql.model.interfaces.DatabaseModelManagement;
 import chav1961.purelib.ui.interfaces.ErrorProcessing;
 import chav1961.purelib.ui.swing.SwingUtils;
 import chav1961.purelib.ui.swing.interfaces.OnAction;
@@ -56,7 +68,7 @@ import chav1961.purelib.ui.swing.useful.JDialogContainer;
 import chav1961.purelib.ui.swing.useful.JLocalizedOptionPane;
 import chav1961.purelib.ui.swing.useful.JSystemTray;
 
-public class Application implements AutoCloseable, LocaleChangeListener {
+public class Application implements AutoCloseable, LocaleChangeListener, NodeMetadataOwner {
 	public static final String	KEY_APPLICATION_NAME = "application.name";
 	public static final String	KEY_APPLICATION_TOOLTIP = "application.name.tt";
 	public static final String	KEY_APPLICATION_STARTED = "application.started";
@@ -77,11 +89,14 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 	}
 	
 	private final ContentMetadataInterface	mdi;
+	private final Connection				dbConn;
 	private final Localizer					localizer;
 	private final SubstitutableProperties	props;
 	private final JPopupMenu				popup;	
 	private final JSystemTray				tray;
 	private final UIPainter					painter;
+	private final SimpleDatabaseManager<SimpleDottedVersion>	mgr;
+	private final DatabaseModelManagement<SimpleDottedVersion>	modelMgmt;
 	private final CountDownLatch			latch = new CountDownLatch(1);
 	private final NanoServiceFactory		nanoService;
 
@@ -96,6 +111,17 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 		this.tray = new JSystemTray(localizer, KEY_APPLICATION_NAME, URI.create("root://"+Application.class.getName()+"/images/trayicon.png"), KEY_APPLICATION_TOOLTIP, popup, props.getProperty(Constants.PROP_GENERAL_TRAY_LANG_EN, boolean.class));
 		this.tray.addActionListener((e)->browseScreen());
 		localizer.addLocaleChangeListener(this);
+		
+		try(final InputStream	is = this.getClass().getResourceAsStream("./db/model.json");
+			final Reader		rdr = new InputStreamReader(is, PureLibSettings.DEFAULT_CONTENT_ENCODING)) {
+			
+			this.modelMgmt = new SimpleDatabaseModelManagement(DbManager.class.getResource("model.json").toURI());
+			this.mgr = new SimpleDatabaseManager<SimpleDottedVersion>(tray, this.modelMgmt.getModel(this.modelMgmt.size()-1), this::getConnection, this::getDbManagement);
+			this.dbConn = DriverManager.getConnection("jdbc:sqlite:"+Constants.NANOCHAT_DATABASE.getAbsolutePath().replace(File.separatorChar, '/'));
+		} catch (SQLException | URISyntaxException e) {
+			throw new EnvironmentException(e); 
+		}
+		
 		this.nanoService = new NanoServiceFactory(PureLibSettings.CURRENT_LOGGER, props);
 		this.painter = new UIPainter(FileSystemInterface.Factory.newInstance(URI.create(FileSystemInterface.FILESYSTEM_URI_SCHEME+":file:./")), localizer, tray);
 		this.nanoService.deploy(PATH_UI_PAINTER, painter);
@@ -106,7 +132,8 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 		try{nanoService.undeploy(PATH_UI_PAINTER);
 			painter.close();
 			nanoService.close();
-		} catch (IOException e) {
+			mgr.close();
+		} catch (IOException | SQLException e) {
 			tray.message(Severity.severe, e.getLocalizedMessage());
 		}
 		localizer.removeLocaleChangeListener(this);
@@ -118,6 +145,11 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 		tray.localeChanged(oldLocale, newLocale);
 	}
 
+	@Override
+	public ContentNodeMetadata getNodeMetadata() {
+		return mdi.getRoot();
+	}
+	
 	public JSystemTray getTray() {
 		return tray;
 	}
@@ -199,6 +231,14 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 			nanoService.stop();
 		}
 	}
+
+	private Connection getConnection() {
+		return null;
+	}
+
+	private DatabaseManagement<SimpleDottedVersion> getDbManagement(final Connection conn) throws SQLException {
+		return null;
+	}
 	
 	public static void main(String[] args) {
 		try(final Localizer	localizer = Localizer.Factory.newInstance(URI.create(Localizer.LOCALIZER_SCHEME+":xml:root://"+Application.class.getName()+"/chav1961/nanochat/client/i18n.xml"))) {
@@ -214,7 +254,7 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 				
 				try(final InputStream	is = new FileInputStream(Constants.NANOCHAT_CONFIG)) {
 					props.load(is);
-					ordinalRun(mdi, localizer, props, false);
+					ordinalRun(mdi, localizer, props, false, false);
 				} catch (IOException e) {
 					firstRun(mdi, localizer, Constants.NANOCHAT_CONFIG);
 				}
@@ -250,9 +290,8 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 			try(final OutputStream	fos = new FileOutputStream(Constants.NANOCHAT_CONFIG)) {
 				
 				props.store(fos, "");
-				prepareDatabase();
-				ordinalRun(mdi, localizer, props, true);
-			} catch (IOException | SQLException e) {
+				ordinalRun(mdi, localizer, props, true, true);
+			} catch (IOException e) {
 				throw new ContentException(e.getLocalizedMessage(), e); 
 			}
 		}
@@ -270,21 +309,43 @@ public class Application implements AutoCloseable, LocaleChangeListener {
 		}
 	}
 
-	private static void ordinalRun(final ContentMetadataInterface mdi, final Localizer localizer, final SubstitutableProperties props, final boolean startHelp) throws IOException {
+	private static void ordinalRun(final ContentMetadataInterface mdi, final Localizer localizer, final SubstitutableProperties props, final boolean prepareDatabase, final boolean startHelp) throws IOException {
 		final Set<String>	names = new HashSet<>();
-		final int			discoveryPort = props.getProperty(Constants.PROP_GENERAL_DISCOVERY_PORT, int.class);
-		final int			tcpPort = props.getProperty(Constants.PROP_GENERAL_DISCOVERY_PORT, int.class);
-		final int			maintenanceTime = props.getProperty(Constants.PROP_GENERAL_DISCOVERY_MAINTENANCE_TIME, int.class);
 
 		names.add(props.getProperty(Constants.PROP_ANARCH_DISTRICT));
 		
 		try(final Application			app = new Application(mdi, localizer, props);
 			final ClientDiscovery		discovery = new ClientDiscovery(props)) {
+			final Connection			conn = app.getConnection();
 
+			try{
+				if (prepareDatabase) {
+					app.getDbManagement(conn).onCreate(conn, app.modelMgmt.getModel(app.modelMgmt.size()-1));
+				}
+				else {
+					final int	action = app.getDbManagement(conn).getDatabaseVersion(conn).compareTo(app.getDbManagement(conn).getVersion(app.modelMgmt.getModel(app.modelMgmt.size()-1)));
+					
+					if (action > 0) {
+						app.getDbManagement(conn).onUpgrade(conn, app.getDbManagement(conn).getDatabaseVersion(conn), app.getDbManagement(conn).getDatabaseModel(conn), app.getDbManagement(conn).getVersion(app.modelMgmt.getModel(app.modelMgmt.size()-1)), app.modelMgmt.getModel(app.modelMgmt.size()-1));
+					}
+					else if (action < 0) {
+						app.getDbManagement(conn).onDowngrade(conn, app.getDbManagement(conn).getDatabaseVersion(conn), app.getDbManagement(conn).getDatabaseModel(conn), app.getDbManagement(conn).getVersion(app.modelMgmt.getModel(app.modelMgmt.size()-1)), app.modelMgmt.getModel(app.modelMgmt.size()-1));
+					}
+				}
+				app.getDbManagement(app.getConnection()).onOpen(conn, app.modelMgmt.getModel(app.modelMgmt.size()-1));
+			} catch (SQLException e) {
+				app.getTray().message(Severity.error, e.getLocalizedMessage());
+			}
+			
 			if (startHelp) {
 				SimpleTimerTask.start(()->app.browseScreen("/static/index.cre"), 1000);
 			}
 			app.await();
+			try{
+				app.getDbManagement(conn).onClose(conn, app.modelMgmt.getModel(app.modelMgmt.size()-1));
+			} catch (SQLException e) {
+				app.getTray().message(Severity.error, e.getLocalizedMessage());
+			}
 		} catch (EnvironmentException | ContentException e) {
 			throw new IOException(e.getLocalizedMessage(), e);
 		}
