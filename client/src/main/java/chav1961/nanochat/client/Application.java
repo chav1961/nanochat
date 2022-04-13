@@ -37,7 +37,6 @@ import chav1961.nanochat.client.settings.SettingsWindow;
 import chav1961.nanochat.client.ui.UIPainter;
 import chav1961.nanochat.common.Constants;
 import chav1961.nanochat.common.NanoChatUtils;
-import chav1961.purelib.basic.AndOrTree;
 import chav1961.purelib.basic.PureLibSettings;
 import chav1961.purelib.basic.SimpleTimerTask;
 import chav1961.purelib.basic.SubstitutableProperties;
@@ -115,9 +114,9 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 		try(final InputStream	is = this.getClass().getResourceAsStream("./db/model.json");
 			final Reader		rdr = new InputStreamReader(is, PureLibSettings.DEFAULT_CONTENT_ENCODING)) {
 			
+			this.dbConn = DriverManager.getConnection("jdbc:sqlite:"+Constants.NANOCHAT_DATABASE.getAbsolutePath().replace(File.separatorChar, '/'));
 			this.modelMgmt = new SimpleDatabaseModelManagement(DbManager.class.getResource("model.json").toURI());
 			this.mgr = new SimpleDatabaseManager<SimpleDottedVersion>(tray, this.modelMgmt.getModel(this.modelMgmt.size()-1), this::getConnection, this::getDbManagement);
-			this.dbConn = DriverManager.getConnection("jdbc:sqlite:"+Constants.NANOCHAT_DATABASE.getAbsolutePath().replace(File.separatorChar, '/'));
 		} catch (SQLException | URISyntaxException e) {
 			throw new EnvironmentException(e); 
 		}
@@ -233,7 +232,7 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 	}
 
 	private Connection getConnection() {
-		return null;
+		return dbConn;
 	}
 
 	private DatabaseManagement<SimpleDottedVersion> getDbManagement(final Connection conn) throws SQLException {

@@ -365,7 +365,7 @@
 					 	 "format":"m"
 					},
 					 {"name":"topics_initiator",
-						 "type":"java.lang.UUID",
+						 "type":"java.util.UUID",
 						 "labelId":"nanoclient.cl_topics.topics_initiator",
 						 "tooltipId":"nanoclient.cl_topics.topics_initiator.tt",
 						 "appUri":"app:column:/nanoclient.cl_topics/topics_initiator?seq=2&type=TEXT",
@@ -481,7 +481,7 @@
 					 	 "format":"m"
 					},
 					 {"name":"topics_initiator",
-						 "type":"java.lang.UUID",
+						 "type":"java.util.UUID",
 						 "labelId":"nanoclient.cl_archive_topics.topics_initiator",
 						 "tooltipId":"nanoclient.cl_archive_topics.topics_initiator.tt",
 						 "appUri":"app:column:/nanoclient.cl_archive_topics/topics_initiator?seq=2&type=TEXT",
