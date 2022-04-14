@@ -1,17 +1,17 @@
 package chav1961.nanochat.common.discovery;
 
-import chav1961.nanochat.common.interfaces.InviteInfo;
-import chav1961.nanochat.common.interfaces.InviteMedia;
-import chav1961.purelib.net.AbstractDiscovery;
-import chav1961.purelib.net.LightWeightNetworkDiscovery;
-import chav1961.purelib.net.interfaces.MediaAdapter;
-import chav1961.purelib.net.interfaces.MediaDescriptor;
-
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.ServerSocket;
 import java.util.UUID;
 
-public class NanoChatDiscovery extends LightWeightNetworkDiscovery<Serializable, Serializable> {
+import chav1961.nanochat.common.interfaces.InviteInfo;
+import chav1961.nanochat.common.interfaces.InviteMedia;
+import chav1961.nanochat.common.interfaces.InviteMediaFactory;
+import chav1961.purelib.net.LightWeightNetworkDiscovery;
+
+public class NanoChatDiscovery<Op extends Enum<?>> extends LightWeightNetworkDiscovery<Serializable, Serializable> implements InviteMediaFactory<Op> {
+	private final ServerSocket	ss = new ServerSocket();
 
 	public NanoChatDiscovery(final int discoveryPortNumber, final int maxRecordSize, final PortBroadcastGenerator generator) throws IOException {
 		super(discoveryPortNumber, maxRecordSize, generator);
@@ -19,16 +19,24 @@ public class NanoChatDiscovery extends LightWeightNetworkDiscovery<Serializable,
 	}
 
 	@Override
+	public synchronized void close() throws IOException {
+		ss.close();
+		super.close();
+	}
+	
+	@Override
 	public void maintenance(final Object content) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public <Op extends Enum<?>> InviteMedia<Op> createServerInviteMedia(final UUID owner, final InviteInfo info, final Class<Op> clazz) throws IOException {
+	@Override
+	public InviteMedia<Op> createServerInviteMedia(final UUID owner, final InviteInfo info, final Class<Op> clazz) throws IOException {
 		return null;
 	}
 	
-	public <Op extends Enum<?>> InviteMedia<Op> createClientInviteMedia(final UUID owner, final UUID serverOwner, final UUID serverInviteId, final Class<Op> clazz) throws IOException {
+	@Override
+	public InviteMedia<Op> createClientInviteMedia(final UUID owner, final UUID serverOwner, final UUID serverInviteId, final Class<Op> clazz) throws IOException {
 		return null;
 	}
 	
