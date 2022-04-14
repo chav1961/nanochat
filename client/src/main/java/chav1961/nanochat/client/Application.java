@@ -33,11 +33,11 @@ import chav1961.nanochat.client.anarchy.TheSameFirstForm;
 import chav1961.nanochat.client.anarchy.TheSameFirstTab;
 import chav1961.nanochat.client.db.DbManagement;
 import chav1961.nanochat.client.db.DbManager;
-import chav1961.nanochat.client.net.ClientDiscovery;
 import chav1961.nanochat.client.settings.SettingsWindow;
 import chav1961.nanochat.client.ui.UIPainter;
 import chav1961.nanochat.common.Constants;
 import chav1961.nanochat.common.NanoChatUtils;
+import chav1961.nanochat.common.discovery.NanoChatDiscovery;
 import chav1961.purelib.basic.PureLibSettings;
 import chav1961.purelib.basic.SimpleTimerTask;
 import chav1961.purelib.basic.SubstitutableProperties;
@@ -58,6 +58,8 @@ import chav1961.purelib.model.interfaces.ContentMetadataInterface;
 import chav1961.purelib.model.interfaces.ContentMetadataInterface.ContentNodeMetadata;
 import chav1961.purelib.model.interfaces.NodeMetadataOwner;
 import chav1961.purelib.nanoservice.NanoServiceFactory;
+import chav1961.purelib.net.DiscoveryEvent;
+import chav1961.purelib.net.interfaces.DiscoveryListener;
 import chav1961.purelib.sql.model.SimpleDatabaseManager;
 import chav1961.purelib.sql.model.SimpleDatabaseModelManagement;
 import chav1961.purelib.sql.model.SimpleDottedVersion;
@@ -102,6 +104,8 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 	private final CountDownLatch			latch = new CountDownLatch(1);
 	private final NanoServiceFactory		nanoService;
 	private final DbManagement				dbm;
+	private final NanoChatDiscovery<?>		discovery;
+	private final DiscoveryListener			dl = this::processDiscoveryEvent;
 
 	private Application(final ContentMetadataInterface mdi, final Localizer localizer, final SubstitutableProperties props) throws EnvironmentException, SyntaxException, NullPointerException, ContentException, IOException {
 		this.mdi = mdi;
@@ -114,6 +118,7 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 		this.tray = new JSystemTray(localizer, KEY_APPLICATION_NAME, URI.create("root://"+Application.class.getName()+"/images/trayicon.png"), KEY_APPLICATION_TOOLTIP, popup, props.getProperty(Constants.PROP_GENERAL_TRAY_LANG_EN, boolean.class));
 		this.tray.addActionListener((e)->browseScreen());
 		this.dbm = new DbManagement(tray);
+		this.discovery = new NanoChatDiscovery<>(props);
 		
 		localizer.addLocaleChangeListener(this);
 		
@@ -130,6 +135,9 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 		this.nanoService = new NanoServiceFactory(PureLibSettings.CURRENT_LOGGER, props);
 		this.painter = new UIPainter(FileSystemInterface.Factory.newInstance(URI.create(FileSystemInterface.FILESYSTEM_URI_SCHEME+":file:./")), localizer, tray);
 		this.nanoService.deploy(PATH_UI_PAINTER, painter);
+		
+		this.discovery.addDiscoveryListener(dl);
+		this.discovery.start();
 	}
 	
 	@Override
@@ -138,6 +146,9 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 			painter.close();
 			nanoService.close();
 			mgr.close();
+			discovery.stop();
+			discovery.removeDiscoveryListener(dl);
+			discovery.close();
 		} catch (IOException | SQLException e) {
 			tray.message(Severity.severe, e.getLocalizedMessage());
 		}
@@ -183,8 +194,16 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 	}
 
 	@OnAction("action:/paused")
-	private void paused(final Hashtable<String,String[]> langs) throws LocalizationException {
-		System.err.println("Paused");
+	private void paused(final Hashtable<String,String[]> langs) {
+		try{if (!discovery.isSuspended()) {
+				discovery.suspend();
+			}
+			else {
+				discovery.resume();
+			}
+		} catch (IOException e) {
+			getLogger().message(Severity.warning, e.getLocalizedMessage());
+		}
 	}
 	
 	@OnAction("action:/notification")
@@ -248,6 +267,10 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 
 	private DatabaseManagement<SimpleDottedVersion> getDbManagement(final Connection conn) throws SQLException {
 		return dbm;
+	}
+
+	private void processDiscoveryEvent(final DiscoveryEvent event) {
+		System.err.println("Call "+event);
 	}
 	
 	public static void main(String[] args) {
@@ -324,8 +347,7 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 
 		names.add(props.getProperty(Constants.PROP_ANARCH_DISTRICT));
 		
-		try(final Application			app = new Application(mdi, localizer, props);
-			final ClientDiscovery		discovery = new ClientDiscovery(props)) {
+		try(final Application			app = new Application(mdi, localizer, props)) {
 			final Connection			conn = app.getConnection();
 
 			try{
@@ -350,7 +372,9 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 			if (startHelp) {
 				SimpleTimerTask.start(()->app.browseScreen("/static/index.cre"), 1000);
 			}
+			
 			app.await();
+			
 			try{
 				app.getDbManagement(conn).onClose(conn, app.modelMgmt.getModel(app.modelMgmt.size()-1));
 			} catch (SQLException e) {

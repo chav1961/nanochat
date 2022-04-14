@@ -5,19 +5,22 @@ import java.io.Serializable;
 import java.net.ServerSocket;
 import java.util.UUID;
 
+import chav1961.nanochat.common.Constants;
 import chav1961.nanochat.common.interfaces.InviteInfo;
 import chav1961.nanochat.common.interfaces.InviteMedia;
 import chav1961.nanochat.common.interfaces.InviteMediaFactory;
+import chav1961.purelib.basic.SubstitutableProperties;
 import chav1961.purelib.net.LightWeightNetworkDiscovery;
 
-public class NanoChatDiscovery<Op extends Enum<?>> extends LightWeightNetworkDiscovery<Serializable, Serializable> implements InviteMediaFactory<Op> {
-	private final ServerSocket	ss = new ServerSocket();
+public class NanoChatDiscovery<Op extends Enum<?>> extends LightWeightNetworkDiscovery<BroadcastInfo, Serializable> implements InviteMediaFactory<Op> {
+	private final ServerSocket				ss = new ServerSocket();
+	private final SubstitutableProperties	props;
 
-	public NanoChatDiscovery(final int discoveryPortNumber, final int maxRecordSize, final PortBroadcastGenerator generator) throws IOException {
-		super(discoveryPortNumber, maxRecordSize, generator);
-		// TODO Auto-generated constructor stub
+	public NanoChatDiscovery(final SubstitutableProperties props) throws IOException {
+		super(props.getProperty(Constants.PROP_GENERAL_DISCOVERY_PORT, int.class), props.getProperty(Constants.PROP_GENERAL_DISCOVERY_RECORD_SIZE, int.class),  new BroadcastGeneratorImpl(props));
+		this.props = props;
 	}
-
+	
 	@Override
 	public synchronized void close() throws IOException {
 		ss.close();
@@ -27,7 +30,7 @@ public class NanoChatDiscovery<Op extends Enum<?>> extends LightWeightNetworkDis
 	@Override
 	public void maintenance(final Object content) {
 		// TODO Auto-generated method stub
-		
+		System.err.println("Maintenance...");
 	}
 
 	@Override
@@ -41,14 +44,18 @@ public class NanoChatDiscovery<Op extends Enum<?>> extends LightWeightNetworkDis
 	}
 	
 	@Override
-	protected Serializable getBroadcastInfo() {
-		// TODO Auto-generated method stub
-		return null;
+	protected BroadcastInfo getBroadcastInfo() {
+		return new BroadcastInfo(props.getProperty(Constants.PROP_GENERAL_ID, UUID.class));
 	}
 
 	@Override
 	protected Serializable getQueryInfo() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	@Override
+	public int getMaintenancePeriod() {
+		return 1000 * props.getProperty(Constants.PROP_GENERAL_DISCOVERY_MAINTENANCE_TIME, int.class);
 	}
 }

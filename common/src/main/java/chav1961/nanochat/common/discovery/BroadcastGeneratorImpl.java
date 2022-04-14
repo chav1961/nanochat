@@ -1,4 +1,4 @@
-package chav1961.nanochat.client.net;
+package chav1961.nanochat.common.discovery;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
