@@ -2,7 +2,7 @@
 	 "name":"nanoclient",
 	 "type":"chav1961.purelib.model.SchemaContainer",
 	 "labelId":"unknown",
-	 "appUri":"app:schema:/nanoclient",
+	 "appUri":"app:schema:/nanoclient?version=0.0",
 	 "relUri":"model",
 	 "localizer":"i18n:xml:root://chav1961.nanochat.client.Application/chav1961/nanochat/client/i18n/i18n.xml",
 	 "format":"",

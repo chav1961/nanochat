@@ -31,6 +31,7 @@ import javax.swing.JPopupMenu;
 import chav1961.nanochat.client.anarchy.SingleWizardStep;
 import chav1961.nanochat.client.anarchy.TheSameFirstForm;
 import chav1961.nanochat.client.anarchy.TheSameFirstTab;
+import chav1961.nanochat.client.db.DbManagement;
 import chav1961.nanochat.client.db.DbManager;
 import chav1961.nanochat.client.net.ClientDiscovery;
 import chav1961.nanochat.client.settings.SettingsWindow;
@@ -45,7 +46,9 @@ import chav1961.purelib.basic.exceptions.EnvironmentException;
 import chav1961.purelib.basic.exceptions.LocalizationException;
 import chav1961.purelib.basic.exceptions.PreparationException;
 import chav1961.purelib.basic.exceptions.SyntaxException;
+import chav1961.purelib.basic.interfaces.LoggerFacade;
 import chav1961.purelib.basic.interfaces.LoggerFacade.Severity;
+import chav1961.purelib.basic.interfaces.LoggerFacadeOwner;
 import chav1961.purelib.fsys.interfaces.FileSystemInterface;
 import chav1961.purelib.i18n.interfaces.Localizer;
 import chav1961.purelib.i18n.interfaces.Localizer.LocaleChangeListener;
@@ -67,7 +70,7 @@ import chav1961.purelib.ui.swing.useful.JDialogContainer;
 import chav1961.purelib.ui.swing.useful.JLocalizedOptionPane;
 import chav1961.purelib.ui.swing.useful.JSystemTray;
 
-public class Application implements AutoCloseable, LocaleChangeListener, NodeMetadataOwner {
+public class Application implements AutoCloseable, LocaleChangeListener, NodeMetadataOwner, LoggerFacadeOwner {
 	public static final String	KEY_APPLICATION_NAME = "application.name";
 	public static final String	KEY_APPLICATION_TOOLTIP = "application.name.tt";
 	public static final String	KEY_APPLICATION_STARTED = "application.started";
@@ -98,6 +101,7 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 	private final DatabaseModelManagement<SimpleDottedVersion>	modelMgmt;
 	private final CountDownLatch			latch = new CountDownLatch(1);
 	private final NanoServiceFactory		nanoService;
+	private final DbManagement				dbm;
 
 	private Application(final ContentMetadataInterface mdi, final Localizer localizer, final SubstitutableProperties props) throws EnvironmentException, SyntaxException, NullPointerException, ContentException, IOException {
 		this.mdi = mdi;
@@ -109,6 +113,8 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 		
 		this.tray = new JSystemTray(localizer, KEY_APPLICATION_NAME, URI.create("root://"+Application.class.getName()+"/images/trayicon.png"), KEY_APPLICATION_TOOLTIP, popup, props.getProperty(Constants.PROP_GENERAL_TRAY_LANG_EN, boolean.class));
 		this.tray.addActionListener((e)->browseScreen());
+		this.dbm = new DbManagement(tray);
+		
 		localizer.addLocaleChangeListener(this);
 		
 		try(final InputStream	is = this.getClass().getResourceAsStream("./db/model.json");
@@ -116,7 +122,7 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 			
 			this.dbConn = DriverManager.getConnection("jdbc:sqlite:"+Constants.NANOCHAT_DATABASE.getAbsolutePath().replace(File.separatorChar, '/'));
 			this.modelMgmt = new SimpleDatabaseModelManagement(DbManager.class.getResource("model.json").toURI());
-			this.mgr = new SimpleDatabaseManager<SimpleDottedVersion>(tray, this.modelMgmt.getModel(this.modelMgmt.size()-1), this::getConnection, this::getDbManagement);
+			this.mgr = new DbManager(tray, this.modelMgmt.getModel(this.modelMgmt.size()-1), this::getConnection, this::getDbManagement);
 		} catch (SQLException | URISyntaxException e) {
 			throw new EnvironmentException(e); 
 		}
@@ -153,6 +159,11 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 		return tray;
 	}
 
+	@Override
+	public LoggerFacade getLogger() {
+		return getTray();
+	}
+	
 	private void browseScreen() {
 		browseScreen(PATH_UI_PAINTER+"/index");
 	}
@@ -236,7 +247,7 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 	}
 
 	private DatabaseManagement<SimpleDottedVersion> getDbManagement(final Connection conn) throws SQLException {
-		return null;
+		return dbm;
 	}
 	
 	public static void main(String[] args) {
