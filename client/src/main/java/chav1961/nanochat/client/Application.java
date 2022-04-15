@@ -15,12 +15,14 @@ import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JComponent;
@@ -37,6 +39,8 @@ import chav1961.nanochat.client.settings.SettingsWindow;
 import chav1961.nanochat.client.ui.UIPainter;
 import chav1961.nanochat.common.Constants;
 import chav1961.nanochat.common.NanoChatUtils;
+import chav1961.nanochat.common.discovery.BroadcastInfo;
+import chav1961.nanochat.common.discovery.Citizen;
 import chav1961.nanochat.common.discovery.NanoChatDiscovery;
 import chav1961.purelib.basic.PureLibSettings;
 import chav1961.purelib.basic.SimpleTimerTask;
@@ -72,6 +76,8 @@ import chav1961.purelib.ui.swing.useful.JDialogContainer;
 import chav1961.purelib.ui.swing.useful.JLocalizedOptionPane;
 import chav1961.purelib.ui.swing.useful.JSystemTray;
 
+//https://www.shubhamdipt.com/blog/how-to-create-a-systemd-service-in-linux/
+
 public class Application implements AutoCloseable, LocaleChangeListener, NodeMetadataOwner, LoggerFacadeOwner {
 	public static final String	KEY_APPLICATION_NAME = "application.name";
 	public static final String	KEY_APPLICATION_TOOLTIP = "application.name.tt";
@@ -106,6 +112,7 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 	private final DbManagement				dbm;
 	private final NanoChatDiscovery<?>		discovery;
 	private final DiscoveryListener			dl = this::processDiscoveryEvent;
+	private final Map<UUID,Citizen>			citizenList = new HashMap<>();
 
 	private Application(final ContentMetadataInterface mdi, final Localizer localizer, final SubstitutableProperties props) throws EnvironmentException, SyntaxException, NullPointerException, ContentException, IOException {
 		this.mdi = mdi;
@@ -166,13 +173,9 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 		return mdi.getRoot();
 	}
 	
-	public JSystemTray getTray() {
-		return tray;
-	}
-
 	@Override
 	public LoggerFacade getLogger() {
-		return getTray();
+		return tray;
 	}
 	
 	private void browseScreen() {
@@ -223,8 +226,7 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 				saveSettings();
 			}			
 		} catch (ContentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			getLogger().message(Severity.warning, e.getLocalizedMessage());
 		}
 	}
 
@@ -270,7 +272,68 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 	}
 
 	private void processDiscoveryEvent(final DiscoveryEvent event) {
-		System.err.println("Call "+event);
+		switch (event.getEventType()) {
+			case GET_STATE	:
+				if (!discovery.isSuspended()) {
+					
+				}
+				break;
+			case STATE		:
+				break;
+			case QUERY_INFO	:
+				if (!discovery.isSuspended()) {
+					
+				}
+				break;
+			case INFO		:
+				break;
+			case PING		:
+				if (!discovery.isSuspended()) {
+					
+				}
+				break;
+			case PONG		:
+				break;
+			case START		:
+				final BroadcastInfo	startBroadcast = (BroadcastInfo)event.getSource();
+				
+				synchronized(citizenList) {
+					if (startBroadcast.citizenUUID.equals(props.getProperty(Constants.PROP_GENERAL_ID, UUID.class))) {
+						citizenList.put(startBroadcast.citizenUUID, new Citizen(event.getDescriptor(), startBroadcast.citizenUUID, startBroadcast.name, startBroadcast.district, startBroadcast.discoveryPort, true, false));
+					}
+					else {
+						citizenList.put(startBroadcast.citizenUUID, new Citizen(event.getDescriptor(), startBroadcast.citizenUUID, startBroadcast.name, startBroadcast.district, startBroadcast.discoveryPort, false));
+					}
+				}
+				break;
+			case SUSPENDED	:
+				final BroadcastInfo	suspendBroadcast = (BroadcastInfo)event.getSource();
+				
+				synchronized(citizenList) {
+					if (citizenList.containsKey(suspendBroadcast)) {
+						citizenList.get(suspendBroadcast).setSuspended(true);
+					}
+				}
+				break;
+			case RESUMED	:
+				final BroadcastInfo	resumeBroadcast = (BroadcastInfo)event.getSource();
+				
+				synchronized(citizenList) {
+					if (citizenList.containsKey(resumeBroadcast.citizenUUID)) {
+						citizenList.get(resumeBroadcast.citizenUUID).setSuspended(false);
+					}
+				}
+				break;
+			case STOP		:
+				final BroadcastInfo	stopBroadcast = (BroadcastInfo)event.getSource();
+				
+				synchronized(citizenList) {
+					citizenList.remove(stopBroadcast.citizenUUID);
+				}
+				break;
+			default:
+				throw new UnsupportedOperationException("Discovery event type ["+event.getEventType()+"] is not supported yet");
+		}
 	}
 	
 	public static void main(String[] args) {
@@ -333,15 +396,6 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 		}
 	}
 
-	private static void prepareDatabase() throws SQLException {
-		// TODO Auto-generated method stub
-		try(final Connection	conn = DriverManager.getConnection("jdbc:sqlite:"+Constants.NANOCHAT_DATABASE.getAbsolutePath().replace(File.separatorChar, '/'));
-			final Statement		stmt = conn.createStatement()) {
-		
-			stmt.executeUpdate("create table if not exists test(id integer primary key, name text not null)");
-		}
-	}
-
 	private static void ordinalRun(final ContentMetadataInterface mdi, final Localizer localizer, final SubstitutableProperties props, final boolean prepareDatabase, final boolean startHelp) throws IOException {
 		final Set<String>	names = new HashSet<>();
 
@@ -366,7 +420,7 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 				}
 				app.getDbManagement(app.getConnection()).onOpen(conn, app.modelMgmt.getModel(app.modelMgmt.size()-1));
 			} catch (SQLException e) {
-				app.getTray().message(Severity.error, e.getLocalizedMessage());
+				app.getLogger().message(Severity.error, e.getLocalizedMessage());
 			}
 			
 			if (startHelp) {
@@ -378,7 +432,7 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 			try{
 				app.getDbManagement(conn).onClose(conn, app.modelMgmt.getModel(app.modelMgmt.size()-1));
 			} catch (SQLException e) {
-				app.getTray().message(Severity.error, e.getLocalizedMessage());
+				app.getLogger().message(Severity.error, e.getLocalizedMessage());
 			}
 		} catch (EnvironmentException | ContentException e) {
 			throw new IOException(e.getLocalizedMessage(), e);

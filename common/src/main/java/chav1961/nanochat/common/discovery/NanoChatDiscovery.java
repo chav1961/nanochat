@@ -12,7 +12,7 @@ import chav1961.nanochat.common.interfaces.InviteMediaFactory;
 import chav1961.purelib.basic.SubstitutableProperties;
 import chav1961.purelib.net.LightWeightNetworkDiscovery;
 
-public class NanoChatDiscovery<Op extends Enum<?>> extends LightWeightNetworkDiscovery<BroadcastInfo, Serializable> implements InviteMediaFactory<Op> {
+public class NanoChatDiscovery<Op extends Enum<?>> extends LightWeightNetworkDiscovery<BroadcastInfo, QueryInfo> implements InviteMediaFactory<Op> {
 	private final ServerSocket				ss = new ServerSocket();
 	private final SubstitutableProperties	props;
 
@@ -45,11 +45,14 @@ public class NanoChatDiscovery<Op extends Enum<?>> extends LightWeightNetworkDis
 	
 	@Override
 	protected BroadcastInfo getBroadcastInfo() {
-		return new BroadcastInfo(props.getProperty(Constants.PROP_GENERAL_ID, UUID.class));
+		return new BroadcastInfo(props.getProperty(Constants.PROP_GENERAL_ID, UUID.class)
+								, props.getProperty(Constants.PROP_GENERAL_NAME, String.class)
+								, props.getProperty(Constants.PROP_ANARCH_DISTRICT, String.class)
+								, props.getProperty(Constants.PROP_GENERAL_DISCOVERY_PORT, int.class));
 	}
 
 	@Override
-	protected Serializable getQueryInfo() {
+	protected QueryInfo getQueryInfo() {
 		// TODO Auto-generated method stub
 		return null;
 	}
