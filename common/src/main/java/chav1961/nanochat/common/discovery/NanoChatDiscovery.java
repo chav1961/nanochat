@@ -11,13 +11,17 @@ import chav1961.nanochat.common.interfaces.InviteMedia;
 import chav1961.nanochat.common.interfaces.InviteMediaFactory;
 import chav1961.purelib.basic.SubstitutableProperties;
 import chav1961.purelib.net.LightWeightNetworkDiscovery;
+import chav1961.purelib.net.interfaces.DiscoveryEventType;
+import chav1961.purelib.net.interfaces.MediaItemDescriptor;
 
 public class NanoChatDiscovery<Op extends Enum<?>> extends LightWeightNetworkDiscovery<BroadcastInfo, QueryInfo> implements InviteMediaFactory<Op> {
 	private final ServerSocket				ss = new ServerSocket();
 	private final SubstitutableProperties	props;
 
 	public NanoChatDiscovery(final SubstitutableProperties props) throws IOException {
-		super(props.getProperty(Constants.PROP_GENERAL_DISCOVERY_PORT, int.class), props.getProperty(Constants.PROP_GENERAL_DISCOVERY_RECORD_SIZE, int.class),  new BroadcastGeneratorImpl(props));
+		super(props.getProperty(Constants.PROP_GENERAL_DISCOVERY_PORT, int.class)
+			, props.getProperty(Constants.PROP_GENERAL_DISCOVERY_RECORD_SIZE, int.class)
+			, new BroadcastGeneratorImpl(props));
 		this.props = props;
 	}
 	
@@ -31,6 +35,12 @@ public class NanoChatDiscovery<Op extends Enum<?>> extends LightWeightNetworkDis
 	public void maintenance(final Object content) {
 		// TODO Auto-generated method stub
 		System.err.println("Maintenance...");
+		try{
+			this.sendBroadcast(DiscoveryEventType.PING, getMediaDescriptor());
+			this.sendBroadcast(DiscoveryEventType.GET_STATE, getMediaDescriptor());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -52,7 +62,7 @@ public class NanoChatDiscovery<Op extends Enum<?>> extends LightWeightNetworkDis
 	}
 
 	@Override
-	protected QueryInfo getQueryInfo() {
+	protected QueryInfo getQueryInfo(final QueryInfo request) {
 		// TODO Auto-generated method stub
 		return null;
 	}

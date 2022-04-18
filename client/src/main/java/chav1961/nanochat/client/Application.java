@@ -21,9 +21,11 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -63,6 +65,8 @@ import chav1961.purelib.model.interfaces.ContentMetadataInterface.ContentNodeMet
 import chav1961.purelib.model.interfaces.NodeMetadataOwner;
 import chav1961.purelib.nanoservice.NanoServiceFactory;
 import chav1961.purelib.net.DiscoveryEvent;
+import chav1961.purelib.net.LightWeightNetworkDiscovery.MediaItemDescriptorImpl;
+import chav1961.purelib.net.interfaces.DiscoveryEventType;
 import chav1961.purelib.net.interfaces.DiscoveryListener;
 import chav1961.purelib.sql.model.SimpleDatabaseManager;
 import chav1961.purelib.sql.model.SimpleDatabaseModelManagement;
@@ -140,7 +144,7 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 		}
 		
 		this.nanoService = new NanoServiceFactory(PureLibSettings.CURRENT_LOGGER, props);
-		this.painter = new UIPainter(FileSystemInterface.Factory.newInstance(URI.create(FileSystemInterface.FILESYSTEM_URI_SCHEME+":file:./")), localizer, tray);
+		this.painter = new UIPainter(this, FileSystemInterface.Factory.newInstance(URI.create(FileSystemInterface.FILESYSTEM_URI_SCHEME+":file:./")), localizer, tray);
 		this.nanoService.deploy(PATH_UI_PAINTER, painter);
 		
 		this.discovery.addDiscoveryListener(dl);
@@ -176,6 +180,24 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 	@Override
 	public LoggerFacade getLogger() {
 		return tray;
+	}
+	
+	@FunctionalInterface
+	public interface CitizenCallback {
+		void process(Citizen c) throws IOException;
+	}
+	
+	public void forAllCitizens(final CitizenCallback callback) throws IOException {
+		if (callback == null) {
+			throw new NullPointerException("Callback can't be null");
+		}
+		else {
+			synchronized (citizenList) {
+				for (Entry<UUID, Citizen> item : citizenList.entrySet()) {
+					callback.process(item.getValue());
+				}
+			}
+		}
 	}
 	
 	private void browseScreen() {
@@ -272,37 +294,22 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 	}
 
 	private void processDiscoveryEvent(final DiscoveryEvent event) {
+		System.err.println("Event: "+event);
 		switch (event.getEventType()) {
-			case GET_STATE	:
-				if (!discovery.isSuspended()) {
-					
-				}
-				break;
-			case STATE		:
-				break;
-			case QUERY_INFO	:
-				if (!discovery.isSuspended()) {
-					
-				}
-				break;
 			case INFO		:
-				break;
-			case PING		:
-				if (!discovery.isSuspended()) {
-					
-				}
-				break;
-			case PONG		:
 				break;
 			case START		:
 				final BroadcastInfo	startBroadcast = (BroadcastInfo)event.getSource();
 				
 				synchronized(citizenList) {
 					if (startBroadcast.citizenUUID.equals(props.getProperty(Constants.PROP_GENERAL_ID, UUID.class))) {
-						citizenList.put(startBroadcast.citizenUUID, new Citizen(event.getDescriptor(), startBroadcast.citizenUUID, startBroadcast.name, startBroadcast.district, startBroadcast.discoveryPort, true, false));
+						citizenList.put(startBroadcast.citizenUUID, 
+								new Citizen(event.getDescriptor(), startBroadcast.citizenUUID, startBroadcast.name, startBroadcast.district
+											, ((MediaItemDescriptorImpl)event.getDescriptor()).getAddress(), startBroadcast.discoveryPort, true, false));
 					}
 					else {
-						citizenList.put(startBroadcast.citizenUUID, new Citizen(event.getDescriptor(), startBroadcast.citizenUUID, startBroadcast.name, startBroadcast.district, startBroadcast.discoveryPort, false));
+						citizenList.put(startBroadcast.citizenUUID, new Citizen(event.getDescriptor(), startBroadcast.citizenUUID, startBroadcast.name, startBroadcast.district
+											, ((MediaItemDescriptorImpl)event.getDescriptor()).getAddress(), startBroadcast.discoveryPort, false));
 					}
 				}
 				break;
@@ -310,8 +317,8 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 				final BroadcastInfo	suspendBroadcast = (BroadcastInfo)event.getSource();
 				
 				synchronized(citizenList) {
-					if (citizenList.containsKey(suspendBroadcast)) {
-						citizenList.get(suspendBroadcast).setSuspended(true);
+					if (citizenList.containsKey(suspendBroadcast.citizenUUID)) {
+						citizenList.get(suspendBroadcast.citizenUUID).setSuspended(true);
 					}
 				}
 				break;
@@ -331,6 +338,7 @@ public class Application implements AutoCloseable, LocaleChangeListener, NodeMet
 					citizenList.remove(stopBroadcast.citizenUUID);
 				}
 				break;
+			case PING : case PONG : case GET_STATE : case STATE : case QUERY_INFO	:
 			default:
 				throw new UnsupportedOperationException("Discovery event type ["+event.getEventType()+"] is not supported yet");
 		}

@@ -7,8 +7,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import chav1961.nanochat.client.Application;
 import chav1961.purelib.basic.PureLibSettings;
 import chav1961.purelib.basic.Utils;
 import chav1961.purelib.basic.interfaces.LoggerFacade;
@@ -28,12 +31,16 @@ import chav1961.purelib.streams.char2char.SubstitutableWriter;
 
 @RootPath("/gui")
 public class UIPainter implements Closeable, LoggerFacadeOwner {
+	private final Application			parent;
 	private final FileSystemInterface	fsi;
 	private final Localizer				localizer;
 	private final LoggerFacade			logger;
 	
-	public UIPainter(final FileSystemInterface fsi, final Localizer localizer, final LoggerFacade logger) {
-		if (fsi == null) {
+	public UIPainter(final Application parent, final FileSystemInterface fsi, final Localizer localizer, final LoggerFacade logger) {
+		if (parent == null) {
+			throw new NullPointerException("Applicaiton can't be null"); 
+		}
+		else if (fsi == null) {
 			throw new NullPointerException("File system interface can't be null"); 
 		}
 		else if (localizer == null) {
@@ -43,6 +50,7 @@ public class UIPainter implements Closeable, LoggerFacadeOwner {
 			throw new NullPointerException("Logger can't be null"); 
 		}
 		else {
+			this.parent = parent;
 			this.fsi = fsi;
 			this.localizer = localizer;
 			this.logger = logger;
@@ -68,6 +76,7 @@ public class UIPainter implements Closeable, LoggerFacadeOwner {
 			final Reader		rdr = new InputStreamReader(is, PureLibSettings.DEFAULT_CONTENT_ENCODING)) {
 
 			Utils.copyStream(rdr, sw);
+			os.flush();
 		}
 		return 200;
 	}
@@ -138,6 +147,42 @@ public class UIPainter implements Closeable, LoggerFacadeOwner {
 	}
 
 	private String indexSubstitutor(final String key) {
-		return key;
+		try {
+			switch (key) {		// https://htmldom.dev/show-a-custom-context-menu-at-clicked-position/
+				case "CitizenList"	:
+					final Set<String>	districts = new HashSet<>();
+					final StringBuilder	sb = new StringBuilder();
+					
+					parent.forAllCitizens((c)->districts.add(c.getCitizenDistrict()));
+					
+					sb.append("<ul>");
+					for (String item : districts) {
+						sb.append("<li>").append(item).append("<br/>").append("<ul>");
+						parent.forAllCitizens((c)-> {
+							if (c.getCitizenDistrict().equals(item)) {
+								sb.append("<li class=\"tooltip\" id=\"citizen.").append(c.getCitizenName()).append("\">");							
+								
+								if (c.isMyself()) {
+									sb.append("<b>").append(c.getCitizenName()).append("</b>");
+								}
+								else if (c.isSuspended()) {
+									sb.append("<i>").append(c.getCitizenName()).append("</i>");
+								}
+								else {
+									sb.append(c.getCitizenName());
+								}
+								sb.append("<span class=\"tooltiptext\">").append(c.getDiscoveryAddress()).append(':').append(c.getDiscoveryPort()).append("</span></li>");
+								sb.append("<script>document.getElementById('citizen.").append(c.getCitizenName()).append("').addEventListener('contextmenu', function (e) {e.preventDefault();});</script>");
+							}
+						});
+						sb.append("</ul></li>");
+					}
+					return sb.append("</ul>").toString();
+				default :
+					return key;
+			}
+		} catch (IOException e) {
+			return e.getLocalizedMessage();
+		}
 	}
 }
