@@ -1,6 +1,8 @@
 package chav1961.nanochat.common.net;
 
 import java.io.IOException;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 
@@ -46,6 +48,11 @@ public class TCPBasedDispatcher extends AbstractUUIDControlledDispatcher<MediaIt
 
 	@Override
 	protected void write(Selector sel, SelectionKey key) throws IOException {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	protected void dispatch(SocketAddress source, ByteBuffer content) throws IOException {
 		// TODO Auto-generated method stub
 		
 	}
