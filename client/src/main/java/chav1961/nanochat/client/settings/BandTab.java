@@ -27,7 +27,7 @@ public class BandTab extends JPanel implements TabContent, LocaleChangeListener,
 	private final SubstitutableProperties	props;
 	private final BandForm					bandForm;
 	private final ContentMetadataInterface	mdi;
-	private final AutoBuiltForm<BandForm>	abf;
+	private final AutoBuiltForm<BandForm,?>	abf;
 	
 	BandTab(final SettingsWindow parent, final Localizer localizer, final SubstitutableProperties props) throws NullPointerException, ContentException {
 		super(new BorderLayout(5,5));
@@ -47,7 +47,7 @@ public class BandTab extends JPanel implements TabContent, LocaleChangeListener,
 			this.mdi = ContentModelFactory.forAnnotatedClass(BandForm.class);
 			this.bandForm = new BandForm(parent.getLogger(), props);
 			
-			abf = new AutoBuiltForm<BandForm>(mdi, localizer, PureLibSettings.INTERNAL_LOADER, bandForm, bandForm);
+			abf = new AutoBuiltForm<BandForm,Object>(mdi, localizer, PureLibSettings.INTERNAL_LOADER, bandForm, bandForm);
 			add(abf, BorderLayout.CENTER);
 		}
 	}

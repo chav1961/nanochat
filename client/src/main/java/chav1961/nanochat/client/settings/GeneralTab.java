@@ -22,12 +22,12 @@ import chav1961.purelib.ui.swing.useful.JCloseableTab;
 public class GeneralTab extends JPanel implements TabContent, LocaleChangeListener, Committer {
 	private static final long serialVersionUID = -3700729728528011664L;
 	
-	private final SettingsWindow			parent;
-	private final Localizer					localizer;
-	private final SubstitutableProperties	props;
-	private final GeneralForm				generalForm;
-	private final ContentMetadataInterface	mdi;
-	private final AutoBuiltForm<GeneralForm>abf;
+	private final SettingsWindow				parent;
+	private final Localizer						localizer;
+	private final SubstitutableProperties		props;
+	private final GeneralForm					generalForm;
+	private final ContentMetadataInterface		mdi;
+	private final AutoBuiltForm<GeneralForm,?>	abf;
 	
 	GeneralTab(final SettingsWindow parent, final Localizer localizer, final SubstitutableProperties props) throws NullPointerException, ContentException {
 		super(new BorderLayout(5,5));
@@ -47,7 +47,7 @@ public class GeneralTab extends JPanel implements TabContent, LocaleChangeListen
 			this.mdi = ContentModelFactory.forAnnotatedClass(GeneralForm.class);
 			this.generalForm = new GeneralForm(parent, parent.getLogger(), props);
 			
-			abf = new AutoBuiltForm<GeneralForm>(mdi, localizer, PureLibSettings.INTERNAL_LOADER, generalForm, generalForm);
+			abf = new AutoBuiltForm<GeneralForm,Object>(mdi, localizer, PureLibSettings.INTERNAL_LOADER, generalForm, generalForm);
 			add(abf, BorderLayout.CENTER);
 		}
 	}

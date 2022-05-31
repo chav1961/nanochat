@@ -27,7 +27,7 @@ public class TheSameFirstTab implements WizardStep<TheSameFirstTab, SingleWizard
 	private final Localizer			localizer;
 	private final TheSameFirstForm	form;
 	private final ContentMetadataInterface			mdi;
-	private final AutoBuiltForm<TheSameFirstForm>	abf;
+	private final AutoBuiltForm<TheSameFirstForm,?>	abf;
 	
 	public TheSameFirstTab(final Localizer localizer, final LoggerFacade logger) throws ContentException {
 		if (localizer == null) {

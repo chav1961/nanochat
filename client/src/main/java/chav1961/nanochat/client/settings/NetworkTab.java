@@ -27,7 +27,7 @@ public class NetworkTab extends JPanel implements TabContent, LocaleChangeListen
 	private final SubstitutableProperties		props;
 	private final NetworkForm					networkForm;
 	private final ContentMetadataInterface		mdi;
-	private final AutoBuiltForm<NetworkForm>	abf;
+	private final AutoBuiltForm<NetworkForm,?>	abf;
 	
 	NetworkTab(final SettingsWindow parent, final Localizer localizer, final SubstitutableProperties props) throws NullPointerException, ContentException {
 		super(new BorderLayout(5,5));
@@ -47,7 +47,7 @@ public class NetworkTab extends JPanel implements TabContent, LocaleChangeListen
 			this.mdi = ContentModelFactory.forAnnotatedClass(NetworkForm.class);
 			this.networkForm = new NetworkForm(parent.getLogger(), props);
 			
-			abf = new AutoBuiltForm<NetworkForm>(mdi, localizer, PureLibSettings.INTERNAL_LOADER, networkForm, networkForm);
+			abf = new AutoBuiltForm<NetworkForm,Object>(mdi, localizer, PureLibSettings.INTERNAL_LOADER, networkForm, networkForm);
 			add(abf, BorderLayout.CENTER);
 		}
 	}
